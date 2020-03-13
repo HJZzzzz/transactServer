@@ -15,11 +15,11 @@ contract Donation {
       projectContract = projectAddress;
   }
 
-  mapping(uint256 => Donation) public donations;
+  mapping(uint256 => Donations) public donations;
 
   event madeDonation(address donor, address charityOrg, uint amount);
 
-  struct Donation {
+  struct Donations {
   uint amount;
   address from;
   address to;
@@ -33,7 +33,7 @@ contract Donation {
     // Check that the donor did not already exist:
     require(registrationContract.approvedDonor(msg.sender), 'Only approved donor can make registrationion.');
     // Donation storage donation = donations[_donationId];
-    donations[_donationId] = Donation({
+    donations[_donationId] = Donations({
         amount: _amount,
         from: msg.sender,
         to: _charityOrgAddress
