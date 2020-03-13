@@ -9,7 +9,7 @@
  * truffleframework.com/docs/advanced/configuration
  *
  * To deploy via Infura you'll need a wallet provider (like @truffle/hdwallet-provider)
- * to sign your transactions before they're sent to a remote public node. Infura accounts
+ * to sign your registrationions before they're sent to a remote public node. Infura accounts
  * are available for free at: infura.io/register.
  *
  * You'll also need a mnemonic - the twelve word phrase the wallet uses to generate
@@ -27,7 +27,7 @@
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the
-   * defaults web3 uses to send transactions. If you don't specify one truffle
+   * defaults web3 uses to send registrationions. If you don't specify one truffle
    * will spin up a development blockchain for you on port 9545 when you
    * run `develop` or `test`. You can ask a truffle command to use a specific
    * network from the command line, e.g
@@ -52,7 +52,7 @@ module.exports = {
     // advanced: {
       // port: 8777,             // Custom port
       // network_id: 1342,       // Custom network
-      // gas: 8500000,           // Gas sent with each transaction (default: ~6700000)
+      // gas: 8500000,           // Gas sent with each registrationion (default: ~6700000)
       // gasPrice: 20000000000,  // 20 gwei (in wei) (default: 100 gwei)
       // from: <address>,        // Account to send txs from (default: accounts[0])
       // websockets: true        // Enable EventEmitter interface for web3 (default: false)

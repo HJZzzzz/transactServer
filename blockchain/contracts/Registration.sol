@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-contract Transact {
+contract Registration {
 
   address owner = msg.sender;
   mapping(address => Donor) public donors;
@@ -86,7 +86,7 @@ contract Transact {
   function makeDonation(address _charityOrgAddress, uint _amount) public onlyDonor{
     uint256 _donationId = numDonations++;
     // Check that the donor did not already exist:
-    require(donors[msg.sender].set, 'Only approved donor can make transaction.');
+    require(donors[msg.sender].set, 'Only approved donor can make registrationion.');
     // Donation storage donation = donations[_donationId];
     donations[_donationId] = Donation({
         amount: _amount,

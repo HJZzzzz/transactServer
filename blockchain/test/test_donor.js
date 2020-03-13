@@ -1,6 +1,6 @@
-const Transact = artifacts.require("Transact");
+const Registration = artifacts.require("Registration");
 
-contract(Transact, accounts => {
+contract(Registration, accounts => {
 
     let networkOwner = accounts[0];
     let donor1 = accounts[1];
@@ -11,9 +11,9 @@ contract(Transact, accounts => {
     
 
     it("Should deploy contract and create inspector 1", async() => {
-        transact = await Transact.deployed({from:networkOwner});
-        await transact.registerInspector(inspector1,"Terry",{from:networkOwner});
-        let result = await transact.getInspectorName(inspector1);
+        registration = await Registration.deployed({from:networkOwner});
+        await registration.registerInspector(inspector1,"Terry",{from:networkOwner});
+        let result = await registration.getInspectorName(inspector1);
         // console.log('result', result);
         assert.strictEqual(
             result,
@@ -24,9 +24,9 @@ contract(Transact, accounts => {
      });
 
      it("Should create donor1", async() => {
-        await transact.registerDonor(donor1,"Jake",{from:donor1});
-        let result1 = await transact.getDonorName(donor1);
-        let result2 = await transact.approvedDonor(donor1);
+        await registration.registerDonor(donor1,"Jake",{from:donor1});
+        let result1 = await registration.getDonorName(donor1);
+        let result2 = await registration.approvedDonor(donor1);
         // console.log('result', result);
         assert.strictEqual(
             result1,
@@ -44,16 +44,16 @@ contract(Transact, accounts => {
 
      it("Shouldn't approve donor1", async() => {
         try{ 
-        await transact.approveDonor(donor1);
-        await transact.approvedDonor(donor1);
+        await registration.approveDonor(donor1);
+        await registration.approvedDonor(donor1);
         }catch{
             'Only Inspector can trigger this action.'
         }
      });
 
      it("Should approve donor1 by inspector", async() => {
-        await transact.approveDonor(donor1,{from:inspector1});
-        let result = await transact.approvedDonor(donor1);
+        await registration.approveDonor(donor1,{from:inspector1});
+        let result = await registration.approvedDonor(donor1);
         // console.log('result', result);
         assert.strictEqual(
             result,
@@ -64,8 +64,8 @@ contract(Transact, accounts => {
      });
 
      it("Should reject donor1 by inspector", async() => {
-        await transact.rejectDonor(donor1,{from:inspector1});
-        let result = await transact.approvedDonor(donor1);
+        await registration.rejectDonor(donor1,{from:inspector1});
+        let result = await registration.approvedDonor(donor1);
         // console.log('result', result);
         assert.strictEqual(
             result,
@@ -76,9 +76,9 @@ contract(Transact, accounts => {
      });
 
      it("Should update donor1's name", async() => {
-        await transact.approveDonor(donor1,{from:inspector1});
-        await transact.updateDonor(donor1,"Jake Peralta",{from:donor1});
-        let result = await transact.getDonorName(donor1);
+        await registration.approveDonor(donor1,{from:inspector1});
+        await registration.updateDonor(donor1,"Jake Peralta",{from:donor1});
+        let result = await registration.getDonorName(donor1);
         // console.log('result', result);
         assert.strictEqual(
             result,
@@ -89,8 +89,8 @@ contract(Transact, accounts => {
      });
 
      it("Should delete donor1", async() => {
-        await transact.deleteDonor(donor1,{from:donor1});
-        let result = await transact.approvedDonor(donor1);
+        await registration.deleteDonor(donor1,{from:donor1});
+        let result = await registration.approvedDonor(donor1);
         // console.log('result', result);
         assert.strictEqual(
             result,
@@ -102,7 +102,7 @@ contract(Transact, accounts => {
 
      it("Shouldn't update donor2's name", async() => {
         try{ 
-            await transact.updateDonor(donor2,"Holt",{from:donor2});
+            await registration.updateDonor(donor2,"Holt",{from:donor2});
         }catch(error){
             assert(error, "You cannot update non-existing donor.");
         }
@@ -111,17 +111,17 @@ contract(Transact, accounts => {
 
      it("Shouldn't delete donor2's name", async() => {
         try{ 
-            await transact.deleteDonor(donor2,"Holt",{from:donor2});
+            await registration.deleteDonor(donor2,"Holt",{from:donor2});
         }catch(error){
             assert(error, "You cannot delete non-existing donor.");
         }
       
      });
 
-     it("Should make transaction", async() => {
-        await transact.registerDonor(donor2,"Holt",{from:donor2}); 
-        await transact.approveDonor(donor2,{from:inspector1});
-        let result = await transact.makeDonation(charityOrg1, 100, {from:donor2});
+     it("Should make registrationion", async() => {
+        await registration.registerDonor(donor2,"Holt",{from:donor2}); 
+        await registration.approveDonor(donor2,{from:inspector1});
+        let result = await registration.makeDonation(charityOrg1, 100, {from:donor2});
         // console.log("result", result.logs[0].event);
         // Check event
         assert.equal(result.logs[0].event,
