@@ -5,6 +5,7 @@ contract Registration {
   address owner = msg.sender;
   mapping(address => Donor) public donors;
   mapping(address => Inspector) public inspectors;
+  mapping(address => Organization) public organizations;
 
 
   struct Donor {
@@ -21,9 +22,17 @@ contract Registration {
     bool set;
   }
 
+  struct Organization {
+    uint256 id;
+    string name;
+
+    bool set;
+  }
+
 
   uint256 numDonors = 0;
   uint256 numInspectors = 0;
+  uint256 numOrganizations = 0;
 
 
   modifier onlyOwner() {
@@ -107,6 +116,49 @@ contract Registration {
 
   function getInspectorName(address _inspectorAddress) public view returns (string memory){
     return inspectors[_inspectorAddress].name;
+    
+  }
+
+  function registerOrganization(address _organizationAddress, string memory _organizationName) public{
+    uint256 _organizationId = numOrganizations++;
+    Organization storage organization = organizations[_organizationAddress];
+    // Check that the charity organization did not already exist:
+    require(!organization.set, 'You cannot add existing organization.');
+    organizations[_organizationAddress] = Organization({
+        id: _organizationId,
+        name: _organizationName,
+        set: false
+    });
+  }
+
+  function approveOrganization(address _organizationAddress) public onlyInspector{
+    organizations[_organizationAddress].set = true;
+  }
+
+  function rejectOrganization(address _organizationAddress) public onlyInspector{
+    organizations[_organizationAddress].set = false;
+  }
+
+  function updateOrganization(address _organizationAddress, string memory _organizationName) public{
+    Organization storage organization = organizations[_organizationAddress];
+    require(organization.set, 'You cannot update non-existing organization.');
+    organizations[_organizationAddress].name = _organizationName;
+  }
+
+  function deleteOrganization(address _organizationAddress) public {
+    // Check that the donor did not already exist:
+    Organization storage organization = organizations[_organizationAddress];
+    require(organization.set, 'You cannot delete non-existing organization.');
+    delete organizations[_organizationAddress];
+  }
+
+  function approvedOrganization(address _organizationAddress) public view returns (bool){
+    return organizations[_organizationAddress].set;
+    
+  }
+
+  function getOrganizationName(address _organizationAddress) public view returns (string memory){
+    return organizations[_organizationAddress].name;
     
   }
 

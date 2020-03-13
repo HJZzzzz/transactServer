@@ -23,6 +23,8 @@ contract Donation {
   uint amount;
   address from;
   address to;
+
+  bool confirmed;
   }
 
   uint256 numDonations = 0;
@@ -36,12 +38,16 @@ contract Donation {
     donations[_donationId] = Donations({
         amount: _amount,
         from: msg.sender,
-        to: _charityOrgAddress
+        to: _charityOrgAddress,
+        confirmed: false
     });
     emit madeDonation(msg.sender, _charityOrgAddress, _amount);
     //distributeDonation(uint256 uint256 _amount, uint256 _projectId)
   }
 
-
+  function confirmReceiveMoney(uint256 _donationId) public {
+    require(donations[_donationId].to = msg.sender, 'Only the receiptor of the donation can confirm.' );
+    donations[_donationId].confirmed = true;
+  }
 
 }
