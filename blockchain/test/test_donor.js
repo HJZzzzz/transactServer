@@ -1,4 +1,5 @@
 const Registration = artifacts.require("Registration");
+const Donation = artifacts.require("Donation");
 
 contract(Registration, accounts => {
 
@@ -8,10 +9,14 @@ contract(Registration, accounts => {
     let inspector1 = accounts[3];
     let charityOrg1 = accounts[4];
 
-    
+    let registration;
+    let donation;
+    before(async () => {
+    registration = await Registration.deployed({from:networkOwner});
+    donation = await Donation.new(registration.address, {from:networkOwner});
+    });
 
     it("Should deploy contract and create inspector 1", async() => {
-        registration = await Registration.deployed({from:networkOwner});
         await registration.registerInspector(inspector1,"Terry",{from:networkOwner});
         let result = await registration.getInspectorName(inspector1);
         // console.log('result', result);
@@ -121,7 +126,7 @@ contract(Registration, accounts => {
      it("Should make registrationion", async() => {
         await registration.registerDonor(donor2,"Holt",{from:donor2}); 
         await registration.approveDonor(donor2,{from:inspector1});
-        let result = await registration.makeDonation(charityOrg1, 100, {from:donor2});
+        let result = await donation.makeDonation(charityOrg1, 100, {from:donor2});
         // console.log("result", result.logs[0].event);
         // Check event
         assert.equal(result.logs[0].event,

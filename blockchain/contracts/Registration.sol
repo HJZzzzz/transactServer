@@ -5,9 +5,7 @@ contract Registration {
   address owner = msg.sender;
   mapping(address => Donor) public donors;
   mapping(address => Inspector) public inspectors;
-  mapping(uint256 => Donation) public donations;
 
-  event madeDonation(address donor, address charityOrg, uint amount);
 
   struct Donor {
     uint256 id;
@@ -23,15 +21,10 @@ contract Registration {
     bool set;
   }
 
-  struct Donation {
-    uint amount;
-    address from;
-    address to;
-  }
 
   uint256 numDonors = 0;
   uint256 numInspectors = 0;
-  uint256 numDonations = 0;
+
 
   modifier onlyOwner() {
       require(msg.sender == owner);
@@ -82,20 +75,7 @@ contract Registration {
     //should we delete account?
   }
 
-  //to transfer to projectIdOwner
-  function makeDonation(address _charityOrgAddress, uint _amount) public onlyDonor{
-    uint256 _donationId = numDonations++;
-    // Check that the donor did not already exist:
-    require(donors[msg.sender].set, 'Only approved donor can make registrationion.');
-    // Donation storage donation = donations[_donationId];
-    donations[_donationId] = Donation({
-        amount: _amount,
-        from: msg.sender,
-        to: _charityOrgAddress
-    });
-    emit madeDonation(msg.sender, _charityOrgAddress, _amount);
-    //distributeDonation(uint256 uint256 _amount, uint256 _projectId)
-  }
+  
 
   // function suspendDonor(address _donorAddress) public onlyInspector{
   //   donors[_donorAddress].set = false;
