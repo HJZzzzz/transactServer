@@ -46,8 +46,13 @@ contract Donation {
   }
 
   function confirmReceiveMoney(uint256 _donationId) public {
-    require(donations[_donationId].to = msg.sender, 'Only the receiptor of the donation can confirm.' );
+    require(donations[_donationId].to == msg.sender, 'Only the receiptor of the donation can confirm.' );
     donations[_donationId].confirmed = true;
+  }
+
+  function confirmedDonation(uint256 _donationId) public view returns (bool){
+    return donations[_donationId].confirmed;
+    
   }
 
 }

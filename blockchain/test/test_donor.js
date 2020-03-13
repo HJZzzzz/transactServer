@@ -125,7 +125,7 @@ contract(Registration, accounts => {
       
      });
 
-     it("Should make registrationion", async() => {
+     it("Should make registration", async() => {
         await registration.registerDonor(donor2,"Holt",{from:donor2}); 
         await registration.approveDonor(donor2,{from:inspector1});
         let result = await donation.makeDonation(charityOrg1, 100, {from:donor2});
@@ -134,6 +134,17 @@ contract(Registration, accounts => {
         assert.equal(result.logs[0].event,
         'madeDonation',
         'The madeDonation event is emitted');
+      
+     });
+
+     it("Should confirm receipt of money", async() => {
+        await donation.confirmReceiveMoney(0, {from: charityOrg1});
+        let result = await donation.confirmedDonation(0);
+        // console.log("result", result.logs[0].event);
+        // Check event
+        assert.equal(result,
+        true,
+        'The confirmReceiveMoney() does not confirm receipt of Money.');
       
      });
 
