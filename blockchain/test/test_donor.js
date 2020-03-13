@@ -1,0 +1,135 @@
+const Transact = artifacts.require("Transact");
+
+contract(Transact, accounts => {
+
+    let networkOwner = accounts[0];
+    let donor1 = accounts[1];
+    let donor2 = accounts[2];
+    let inspector1 = accounts[3];
+    let charityOrg1 = accounts[4];
+
+    
+
+    it("Should deploy contract and create inspector 1", async() => {
+        transact = await Transact.deployed({from:networkOwner});
+        await transact.registerInspector(inspector1,"Terry",{from:networkOwner});
+        let result = await transact.getInspectorName(inspector1);
+        // console.log('result', result);
+        assert.strictEqual(
+            result,
+            "Terry",
+            'createInspector() did not create Inspector 1'
+          );
+      
+     });
+
+     it("Should create donor1", async() => {
+        await transact.registerDonor(donor1,"Jake",{from:donor1});
+        let result1 = await transact.getDonorName(donor1);
+        let result2 = await transact.approvedDonor(donor1);
+        // console.log('result', result);
+        assert.strictEqual(
+            result1,
+            "Jake",
+            'createDonor() did not create Donor 1'
+          );
+
+          assert.strictEqual(
+            result2,
+            false,
+            'createDonor() did not create Donor 1'
+          ); 
+      
+     });
+
+     it("Shouldn't approve donor1", async() => {
+        try{ 
+        await transact.approveDonor(donor1);
+        await transact.approvedDonor(donor1);
+        }catch{
+            'Only Inspector can trigger this action.'
+        }
+     });
+
+     it("Should approve donor1 by inspector", async() => {
+        await transact.approveDonor(donor1,{from:inspector1});
+        let result = await transact.approvedDonor(donor1);
+        // console.log('result', result);
+        assert.strictEqual(
+            result,
+            true,
+            'approveDonor() did not approve Donor 1'
+          );
+      
+     });
+
+     it("Should reject donor1 by inspector", async() => {
+        await transact.rejectDonor(donor1,{from:inspector1});
+        let result = await transact.approvedDonor(donor1);
+        // console.log('result', result);
+        assert.strictEqual(
+            result,
+            false,
+            'rejectDonor() did not reject Donor 1'
+          );
+      
+     });
+
+     it("Should update donor1's name", async() => {
+        await transact.approveDonor(donor1,{from:inspector1});
+        await transact.updateDonor(donor1,"Jake Peralta",{from:donor1});
+        let result = await transact.getDonorName(donor1);
+        // console.log('result', result);
+        assert.strictEqual(
+            result,
+            "Jake Peralta",
+            'updateDonor() did not update Donor 1'
+          );
+      
+     });
+
+     it("Should delete donor1", async() => {
+        await transact.deleteDonor(donor1,{from:donor1});
+        let result = await transact.approvedDonor(donor1);
+        // console.log('result', result);
+        assert.strictEqual(
+            result,
+            false,
+            'deleteDonor() did not delete Donor 1'
+          );
+      
+     });
+
+     it("Shouldn't update donor2's name", async() => {
+        try{ 
+            await transact.updateDonor(donor2,"Holt",{from:donor2});
+        }catch(error){
+            assert(error, "You cannot update non-existing donor.");
+        }
+      
+     });
+
+     it("Shouldn't delete donor2's name", async() => {
+        try{ 
+            await transact.deleteDonor(donor2,"Holt",{from:donor2});
+        }catch(error){
+            assert(error, "You cannot delete non-existing donor.");
+        }
+      
+     });
+
+     it("Should make transaction", async() => {
+        await transact.registerDonor(donor2,"Holt",{from:donor2}); 
+        await transact.approveDonor(donor2,{from:inspector1});
+        let result = await transact.makeDonation(charityOrg1, 100, {from:donor2});
+        // console.log("result", result.logs[0].event);
+        // Check event
+        assert.equal(result.logs[0].event,
+        'madeDonation',
+        'The madeDonation event is emitted');
+      
+     });
+
+
+
+});
