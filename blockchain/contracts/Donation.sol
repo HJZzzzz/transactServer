@@ -1,15 +1,18 @@
 pragma solidity ^0.5.0;
 
 import "./Registration.sol";
+import "./Project.sol";
 
 contract Donation {
 
   address owner = msg.sender;
   
   Registration registrationContract;
+  Project projectContract;
 
-  constructor(Registration registrationAddress) public {
+  constructor(Registration registrationAddress, Project projectAddress) public {
       registrationContract = registrationAddress;
+      projectContract = projectAddress;
   }
 
   mapping(uint256 => Donation) public donations;
