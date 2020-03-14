@@ -1,6 +1,5 @@
 pragma solidity ^0.5.0;
 import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
-
 import "./Registration.sol";
 import "./Project.sol";
 
@@ -35,7 +34,7 @@ contract Donation is ERC721 {
   function makeDonation(address _charityOrgAddress, uint _amount) public {
     uint256 _donationId = numDonations++;
     // Check that the donor did not already exist:
-    require(registrationContract.approvedDonor(msg.sender), 'Only approved donor can make registrationion.');
+    require(registrationContract.approvedDonor(msg.sender), 'Only approved donor can make registration.');
     // Donation storage donation = donations[_donationId];
     super._mint(msg.sender,_donationId);
     donations[_donationId] = Donation({
@@ -52,6 +51,7 @@ contract Donation is ERC721 {
   function confirmReceiveMoney(uint256 _donationId) public {
     require(donations[_donationId].to == msg.sender, 'Only the receiptor of the donation can confirm.' );
     donations[_donationId].confirmed = true;
+    // burn token
   }
 
   function confirmedDonation(uint256 _donationId) public view returns (bool){
