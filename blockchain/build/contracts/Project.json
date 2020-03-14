@@ -1,0 +1,531 @@
+{
+  "contractName": "Project",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract Registration",
+          "name": "registrationAddress",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.16+commit.9c3226ce\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"contract Registration\",\"name\":\"registrationAddress\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/huangjingzhan/Desktop/transactServer/blockchain/contracts/Project.sol\":\"Project\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/huangjingzhan/Desktop/transactServer/blockchain/contracts/Project.sol\":{\"keccak256\":\"0x93a92dec55b2ddecdb00dacea4c073d0d5b571ee1c2e816c91f736245a26b5c2\",\"urls\":[\"bzz-raw://03587aaf0df1d1552618b3bdf7e445981228aecc1987f8ad0ae3bfffcd5fee21\",\"dweb:/ipfs/QmXqdANr2FYcJUJQKDkVmteQB15b3eURxpLEiE292iJi6P\"]},\"/Users/huangjingzhan/Desktop/transactServer/blockchain/contracts/Registration.sol\":{\"keccak256\":\"0xb01b2b59db488f997af9c8241f02ecec3dd0ee27e5b01bd96a4a66345b79ad72\",\"urls\":[\"bzz-raw://0eed0835b6161f5cdfacb5bb3b4fdcb5b7e6bfbb3e3e9197cca9aac7addc1738\",\"dweb:/ipfs/QmW7TDtNwuJXKb3w5yoZ7b2f46bPuFqbo7Qp4XWPBZwJe4\"]}},\"version\":1}",
+  "bytecode": "0x6080604052336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550348015604f57600080fd5b5060405161011038038061011083398181016040526020811015607157600080fd5b810190808051906020019092919050505080600160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555050603e806100d26000396000f3fe6080604052600080fdfea265627a7a72315820520d86b9fc53260aea191bb3b00355c590706d2f8469f692b60ac7886a09977364736f6c63430005100032",
+  "deployedBytecode": "0x6080604052600080fdfea265627a7a72315820520d86b9fc53260aea191bb3b00355c590706d2f8469f692b60ac7886a09977364736f6c63430005100032",
+  "sourceMap": "55:205:3:-;;;93:10;77:26;;;;;;;;;;;;;;;;;;;;148:108;8:9:-1;5:2;;;30:1;27;20:12;5:2;148:108:3;;;;;;;;;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;148:108:3;;;;;;;;;;;;;;;;232:19;209:20;;:42;;;;;;;;;;;;;;;;;;148:108;55:205;;;;;;",
+  "deployedSourceMap": "55:205:3:-;;;;;",
+  "source": "pragma solidity ^0.5.0;\n\nimport \"./Registration.sol\";\n\ncontract Project {\n\n  address owner = msg.sender;\n  \n  Registration registrationContract;\n\n  constructor(Registration registrationAddress) public {\n      registrationContract = registrationAddress;\n  }\n\n\n}",
+  "sourcePath": "/Users/huangjingzhan/Desktop/transactServer/blockchain/contracts/Project.sol",
+  "ast": {
+    "absolutePath": "/Users/huangjingzhan/Desktop/transactServer/blockchain/contracts/Project.sol",
+    "exportedSymbols": {
+      "Project": [
+        370
+      ]
+    },
+    "id": 371,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 352,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:3"
+      },
+      {
+        "absolutePath": "/Users/huangjingzhan/Desktop/transactServer/blockchain/contracts/Registration.sol",
+        "file": "./Registration.sol",
+        "id": 353,
+        "nodeType": "ImportDirective",
+        "scope": 371,
+        "sourceUnit": 792,
+        "src": "25:28:3",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 370,
+        "linearizedBaseContracts": [
+          370
+        ],
+        "name": "Project",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 357,
+            "name": "owner",
+            "nodeType": "VariableDeclaration",
+            "scope": 370,
+            "src": "77:26:3",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 354,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "77:7:3",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "expression": {
+                "argumentTypes": null,
+                "id": 355,
+                "name": "msg",
+                "nodeType": "Identifier",
+                "overloadedDeclarations": [],
+                "referencedDeclaration": 1996,
+                "src": "93:3:3",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_magic_message",
+                  "typeString": "msg"
+                }
+              },
+              "id": 356,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": false,
+              "lValueRequested": false,
+              "memberName": "sender",
+              "nodeType": "MemberAccess",
+              "referencedDeclaration": null,
+              "src": "93:10:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address_payable",
+                "typeString": "address payable"
+              }
+            },
+            "visibility": "internal"
+          },
+          {
+            "constant": false,
+            "id": 359,
+            "name": "registrationContract",
+            "nodeType": "VariableDeclaration",
+            "scope": 370,
+            "src": "110:33:3",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_Registration_$791",
+              "typeString": "contract Registration"
+            },
+            "typeName": {
+              "contractScope": null,
+              "id": 358,
+              "name": "Registration",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 791,
+              "src": "110:12:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Registration_$791",
+                "typeString": "contract Registration"
+              }
+            },
+            "value": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 368,
+              "nodeType": "Block",
+              "src": "201:55:3",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 366,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "id": 364,
+                      "name": "registrationContract",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 359,
+                      "src": "209:20:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_Registration_$791",
+                        "typeString": "contract Registration"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "id": 365,
+                      "name": "registrationAddress",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 361,
+                      "src": "232:19:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_Registration_$791",
+                        "typeString": "contract Registration"
+                      }
+                    },
+                    "src": "209:42:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_Registration_$791",
+                      "typeString": "contract Registration"
+                    }
+                  },
+                  "id": 367,
+                  "nodeType": "ExpressionStatement",
+                  "src": "209:42:3"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 369,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 362,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 361,
+                  "name": "registrationAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 369,
+                  "src": "160:32:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_Registration_$791",
+                    "typeString": "contract Registration"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 360,
+                    "name": "Registration",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 791,
+                    "src": "160:12:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_Registration_$791",
+                      "typeString": "contract Registration"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "159:34:3"
+            },
+            "returnParameters": {
+              "id": 363,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "201:0:3"
+            },
+            "scope": 370,
+            "src": "148:108:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 371,
+        "src": "55:205:3"
+      }
+    ],
+    "src": "0:260:3"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/huangjingzhan/Desktop/transactServer/blockchain/contracts/Project.sol",
+    "exportedSymbols": {
+      "Project": [
+        370
+      ]
+    },
+    "id": 371,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 352,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:3"
+      },
+      {
+        "absolutePath": "/Users/huangjingzhan/Desktop/transactServer/blockchain/contracts/Registration.sol",
+        "file": "./Registration.sol",
+        "id": 353,
+        "nodeType": "ImportDirective",
+        "scope": 371,
+        "sourceUnit": 792,
+        "src": "25:28:3",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 370,
+        "linearizedBaseContracts": [
+          370
+        ],
+        "name": "Project",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 357,
+            "name": "owner",
+            "nodeType": "VariableDeclaration",
+            "scope": 370,
+            "src": "77:26:3",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 354,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "77:7:3",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "expression": {
+                "argumentTypes": null,
+                "id": 355,
+                "name": "msg",
+                "nodeType": "Identifier",
+                "overloadedDeclarations": [],
+                "referencedDeclaration": 1996,
+                "src": "93:3:3",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_magic_message",
+                  "typeString": "msg"
+                }
+              },
+              "id": 356,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": false,
+              "lValueRequested": false,
+              "memberName": "sender",
+              "nodeType": "MemberAccess",
+              "referencedDeclaration": null,
+              "src": "93:10:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address_payable",
+                "typeString": "address payable"
+              }
+            },
+            "visibility": "internal"
+          },
+          {
+            "constant": false,
+            "id": 359,
+            "name": "registrationContract",
+            "nodeType": "VariableDeclaration",
+            "scope": 370,
+            "src": "110:33:3",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_Registration_$791",
+              "typeString": "contract Registration"
+            },
+            "typeName": {
+              "contractScope": null,
+              "id": 358,
+              "name": "Registration",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 791,
+              "src": "110:12:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Registration_$791",
+                "typeString": "contract Registration"
+              }
+            },
+            "value": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 368,
+              "nodeType": "Block",
+              "src": "201:55:3",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 366,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "id": 364,
+                      "name": "registrationContract",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 359,
+                      "src": "209:20:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_Registration_$791",
+                        "typeString": "contract Registration"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "id": 365,
+                      "name": "registrationAddress",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 361,
+                      "src": "232:19:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_Registration_$791",
+                        "typeString": "contract Registration"
+                      }
+                    },
+                    "src": "209:42:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_Registration_$791",
+                      "typeString": "contract Registration"
+                    }
+                  },
+                  "id": 367,
+                  "nodeType": "ExpressionStatement",
+                  "src": "209:42:3"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 369,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 362,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 361,
+                  "name": "registrationAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 369,
+                  "src": "160:32:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_Registration_$791",
+                    "typeString": "contract Registration"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 360,
+                    "name": "Registration",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 791,
+                    "src": "160:12:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_Registration_$791",
+                      "typeString": "contract Registration"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "159:34:3"
+            },
+            "returnParameters": {
+              "id": 363,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "201:0:3"
+            },
+            "scope": 370,
+            "src": "148:108:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 371,
+        "src": "55:205:3"
+      }
+    ],
+    "src": "0:260:3"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
+  },
+  "networks": {
+    "1584189351284": {
+      "events": {},
+      "links": {},
+      "address": "0xeD162DA57a426169f57A66296837B34882705C90",
+      "transactionHash": "0xb2d4bbdf55e21ef444e7db2a9b099185f3dbccea6213f136ee72612110a91c45"
+    }
+  },
+  "schemaVersion": "3.0.23",
+  "updatedAt": "2020-03-14T14:25:19.382Z",
+  "networkType": "ethereum",
+  "devdoc": {
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}

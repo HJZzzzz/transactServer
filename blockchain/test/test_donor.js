@@ -1,6 +1,7 @@
 const Registration = artifacts.require("Registration");
 const Project = artifacts.require("Project");
 const Donation = artifacts.require("Donation");
+const MyERC721 = artifacts.require("MyERC721");
 
 contract(Registration, accounts => {
 
@@ -16,6 +17,7 @@ contract(Registration, accounts => {
     registration = await Registration.deployed({from:networkOwner});
     project= await Project.new(registration.address, {from:networkOwner});
     donation = await Donation.new(registration.address, project.address, {from:networkOwner});
+    erc = await MyERC721.deployed({from:networkOwner});
     });
 
     it("Should deploy contract and create inspector 1", async() => {
@@ -131,7 +133,7 @@ contract(Registration, accounts => {
         let result = await donation.makeDonation(charityOrg1, 100, {from:donor2});
         // console.log("result", result.logs[0].event);
         // Check event
-        assert.equal(result.logs[0].event,
+        assert.equal(result.logs[1].event,
         'madeDonation',
         'The madeDonation event is emitted');
       

@@ -1,9 +1,10 @@
 pragma solidity ^0.5.0;
+import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 import "./Registration.sol";
 import "./Project.sol";
 
-contract Donation {
+contract Donation is ERC721 {
 
   address owner = msg.sender;
   
@@ -15,11 +16,12 @@ contract Donation {
       projectContract = projectAddress;
   }
 
-  mapping(uint256 => Donations) public donations;
+  mapping(uint256 => Donation) public donations;
 
   event madeDonation(address donor, address charityOrg, uint amount);
 
-  struct Donations {
+  struct Donation {
+  uint id;
   uint amount;
   address from;
   address to;
@@ -35,7 +37,9 @@ contract Donation {
     // Check that the donor did not already exist:
     require(registrationContract.approvedDonor(msg.sender), 'Only approved donor can make registrationion.');
     // Donation storage donation = donations[_donationId];
-    donations[_donationId] = Donations({
+    super._mint(msg.sender,_donationId);
+    donations[_donationId] = Donation({
+        id:_donationId,
         amount: _amount,
         from: msg.sender,
         to: _charityOrgAddress,
@@ -54,5 +58,7 @@ contract Donation {
     return donations[_donationId].confirmed;
     
   }
+
+
 
 }

@@ -1,5 +1,5 @@
 pragma solidity ^0.5.0;
-import "github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC721/ERC721.sol";
+import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract MyERC721 is ERC721{
     
