@@ -1,7 +1,7 @@
 from web3 import Web3
 import json
-import argparse
-import requests
+# import argparse
+# import requests
 # from solc import compile_source
 # from web3.utils.encoding import to_hex
 with open("Dice.json") as f:
