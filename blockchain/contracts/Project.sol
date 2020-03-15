@@ -87,12 +87,6 @@ contract Project {
         return newProjectId; 
     }
     
-    // function distributeDonation(uint256 donationAmount, uint256 projectId) public{
-    //     projectList[projectId].numOfDonationReceived = projectList[projectId].numOfDonationReceived + 1;
-    //     projectList[projectId].amountOfDonationReceived += donationAmount;
-    //     projectList[projectId].amountOfDonationBeneficiaryReceived += donationAmount * projectList[projectId].beneficiaryGainedRatio;
-    // }
-    
     function approveProject(uint256 projectId) public onlyAppointedInspector(projectId) {
         require(
             projectList[projectId].state == projectState.pending,
@@ -117,6 +111,12 @@ contract Project {
         uint256 checkId = projectCheckingDetails[projectId];
         checkingList[checkId].state = projectState.rejected;
         // checkingList[checkId].reason = rejectReason;
+    }
+    
+    function distributeDonation(uint256 donationAmount, uint256 projectId) public{
+        projectList[projectId].numOfDonationReceived = projectList[projectId].numOfDonationReceived + 1;
+        projectList[projectId].amountOfDonationReceived += donationAmount;
+        projectList[projectId].amountOfDonationBeneficiaryReceived += donationAmount * projectList[projectId].beneficiaryGainedRatio;
     }
     
     modifier onlyAppointedInspector(uint256 projectId) {

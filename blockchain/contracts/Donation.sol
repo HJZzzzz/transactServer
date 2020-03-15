@@ -31,12 +31,12 @@ contract Donation is ERC721 {
     uint256 numDonations = 0;
 
     //to transfer to projectIdOwner
-    function makeDonation(address _charityOrgAddress, uint _amount) public {
+    function makeDonation(address _charityOrgAddress, uint _amount, uint256 _projectId) public {
         uint256 _donationId = numDonations++;
         // Check that the donor did not already exist:
         require(registrationContract.approvedDonor(msg.sender), 'Only approved donor can make registration.');
         // Donation storage donation = donations[_donationId];
-        super._mint(msg.sender,_donationId);
+        // super._mint(msg.sender,_donationId);
         donations[_donationId] = Donation({
             id:_donationId,
             amount: _amount,
@@ -45,7 +45,7 @@ contract Donation is ERC721 {
             confirmed: false
         });
         emit madeDonation(msg.sender, _charityOrgAddress, _amount);
-        distributeDonation(uint256 _amount, uint256 _projectId)
+        projectContract.distributeDonation( _amount,  _projectId);
     }
 
     function confirmReceiveMoney(uint256 _donationId) public {
@@ -54,11 +54,11 @@ contract Donation is ERC721 {
         // burn token
     }
 
-    function distributeDonation(uint256 donationAmount, uint256 projectId) public{
-        projectContract.projectList[projectId].numOfDonationReceived = projectContract.projectList[projectId].numOfDonationReceived + 1;
-        projectContract.projectList[projectId].amountOfDonationReceived += donationAmount;
-        projectContract.projectList[projectId].amountOfDonationBeneficiaryReceived += donationAmount * projectContract.projectList[projectId].beneficiaryGainedRatio;
-    }
+    // function distributeDonation(uint256 donationAmount, uint256 projectId) public{
+    //     projectContract.projectList[projectId].numOfDonationReceived = projectContract.projectList[projectId].numOfDonationReceived + 1;
+    //     projectContract.projectList[projectId].amountOfDonationReceived += donationAmount;
+    //     projectContract.projectList[projectId].amountOfDonationBeneficiaryReceived += donationAmount * projectContract.projectList[projectId].beneficiaryGainedRatio;
+    // }
     
     function confirmedDonation(uint256 _donationId) public view returns (bool){
         return donations[_donationId].confirmed;
