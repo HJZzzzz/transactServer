@@ -6,6 +6,8 @@ contract Registration {
   mapping(address => Donor) public donors;
   mapping(address => Inspector) public inspectors;
   mapping(address => Organization) public organizations;
+  mapping(uint256 => Inspector) inspectorList;
+  mapping(uint256 => address) inspectorAddress; 
 
 
   struct Donor {
@@ -53,6 +55,8 @@ contract Registration {
   function registerInspector(address _inspectorAddress, string memory _inspectorName) public onlyOwner {
     uint256 _inspectorId = numInspectors++;
     Inspector storage inspector = inspectors[_inspectorAddress];
+    inspectorList[_inspectorId] = inspector;
+    
     // Check that the inspector did not already exist:
     require(!inspector.set, 'You cannot add existing inspector.');
     inspectors[_inspectorAddress] = Inspector({
@@ -83,8 +87,6 @@ contract Registration {
     donors[_donorAddress].set = false;
     //should we delete account?
   }
-
-  
 
   // function suspendDonor(address _donorAddress) public onlyInspector{
   //   donors[_donorAddress].set = false;
