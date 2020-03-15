@@ -58,12 +58,13 @@ contract Project {
     // }
     
     function registerProject(uint256 organizationId, uint256 ownerId, uint256 beneficiaryListId, uint256 documentationId, uint256 beneficiaryGainedRatio) public payable returns (uint256){
+        uint256 numberOfInspectors = registrationContract.getNumOfInspectors();
         CharityProject memory newProject = CharityProject(
             organizationId, 
             ownerId,
             beneficiaryListId, 
             documentationId,
-            (uint256)(block.timestamp % numInspectors) + 1, // random number generate assigned inspectorId 
+            (uint256)(block.timestamp % numberOfInspectors) + 1, // random number generate assigned inspectorId 
             beneficiaryGainedRatio,
             projectState.pending, 
             0,
@@ -120,7 +121,9 @@ contract Project {
     
     modifier onlyAppointedInspector(uint256 projectId) {
         // require(msg.sender == inspectorList[projectList[projectId].inspectorId].inspectorAddress, "Invalid inspector");
-        require(msg.sender == registrationContract.inspectorAddress[projectList[projectId].inspectorId], "Invalid inspector");
+        address appointedInspectorAddress = registrationContract.getInspectorAddressById(projectList[projectId].inspectorId); 
+        
+        require(msg.sender == appointedInspectorAddress, "Invalid inspector");
         _;
     }
     
