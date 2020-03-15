@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pymongo import MongoClient
+import blockchainSetup 
 
 app = Flask(__name__)
 title = "TransACT Server"
@@ -28,3 +29,9 @@ def rigisterDonor():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+@app.route("/makeDonation", methods=['POST'])
+def donate():
+    charity = request.form["charityAddress"]
+    amount = request.form["amount"]
+    return blockchainSetup.makeDonation(charity,amount)
