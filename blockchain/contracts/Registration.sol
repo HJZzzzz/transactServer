@@ -7,7 +7,7 @@ contract Registration {
   mapping(address => Inspector) public inspectors;
   mapping(address => Organization) public organizations;
   mapping(uint256 => Inspector) inspectorList;
-  mapping(uint256 => address) inspectorAddress; 
+  mapping(uint256 => address) public inspectorAddress; 
 
 
   struct Donor {
@@ -33,7 +33,7 @@ contract Registration {
 
 
   uint256 numDonors = 0;
-  uint256 numInspectors = 0;
+  uint256 public numInspectors = 0;
   uint256 numOrganizations = 0;
 
 
@@ -163,5 +163,12 @@ contract Registration {
     return organizations[_organizationAddress].name;
     
   }
-
+  
+  function getNumOfInspectors() public view returns(uint256){
+      return numInspectors;
+  }
+  
+  function getInspectorAddressById(uint256 inspectorId) public view returns(address){
+      return inspectorAddress[inspectorId];
+  }
 }
