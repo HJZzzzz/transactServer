@@ -31,7 +31,7 @@ contract Donation is ERC721 {
     uint256 numDonations = 0;
 
     //to transfer to projectIdOwner
-    function makeDonation(address _charityOrgAddress, uint _amount) public {
+    function makeDonation(address _charityOrgAddress, uint _amount,uint _projectId) public {
         uint256 _donationId = numDonations++;
         // Check that the donor did not already exist:
         require(registrationContract.approvedDonor(msg.sender), 'Only approved donor can make registration.');

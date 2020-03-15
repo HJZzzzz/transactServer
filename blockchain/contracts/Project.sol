@@ -42,7 +42,7 @@ contract Project {
     // mapping(uint256 => Inspector) inspectorList;
     mapping(uint256 => Check) checkingList; 
     mapping(uint256 => uint256) projectCheckingDetails; 
-    mapping(uint256 => CharityProject) projectList; 
+    mapping(uint256 => CharityProject) public projectList; 
     
     // uint256 numInspectors; 
     uint256 numProjects; 
