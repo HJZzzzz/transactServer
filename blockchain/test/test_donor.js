@@ -127,7 +127,11 @@ contract(Registration, accounts => {
       
      });
 
-     it("Should make registration", async() => {
+     // create project
+
+     // approve project
+
+     it("Should make donation", async() => {
         await registration.registerDonor(donor2,"Holt",{from:donor2}); 
         await registration.approveDonor(donor2,{from:inspector1});
         let result = await donation.makeDonation(charityOrg1, 100, {from:donor2});
