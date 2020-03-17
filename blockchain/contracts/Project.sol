@@ -3,19 +3,15 @@ pragma solidity ^0.5.0;
 import "./Registration.sol";
 
 contract Project {
-  
     Registration registrationContract;
 
     constructor(Registration registrationAddress) public {
         registrationContract = registrationAddress;
     }
-    
     enum projectState { pending, approved, rejected }
     address _owner = msg.sender;
-    
     struct CharityProject {
         uint256 projectOrganizationId;
-        uint256 projectOwnerId; 
         uint256 beneficiaryListId;
         uint256 projectDocumentationId; 
         
@@ -57,14 +53,13 @@ contract Project {
     //     return newInspectorId; 
     // }
     
-    function registerProject(uint256 organizationId, uint256 ownerId, uint256 beneficiaryListId, uint256 documentationId, uint256 beneficiaryGainedRatio) public payable returns (uint256){
+    function registerProject(uint256 organizationId, uint256 beneficiaryListId, uint256 documentationId, uint256 beneficiaryGainedRatio) public payable returns (uint256){
         uint256 numberOfInspectors = registrationContract.getNumOfInspectors();
         CharityProject memory newProject = CharityProject(
             organizationId, 
-            ownerId,
             beneficiaryListId, 
             documentationId,
-            (uint256)(block.timestamp % numberOfInspectors) + 1, // random number generate assigned inspectorId 
+            (uint256)(block.timestamp % numberOfInspectors), // random number generate assigned inspectorId 
             beneficiaryGainedRatio,
             projectState.pending, 
             0,
@@ -113,6 +108,14 @@ contract Project {
         // checkingList[checkId].reason = rejectReason;
     }
     
+    function checkProjectStatus(uint256 projectId) public view returns (projectState){
+        return projectList[projectId].state;
+    }
+
+    function getInspectorIdByProjectId(uint256 projectId) public view returns(uint256){
+        return projectList[projectId].inspectorId;
+    }
+
     function distributeDonation(uint256 donationAmount, uint256 projectId) public{
         projectList[projectId].numOfDonationReceived = projectList[projectId].numOfDonationReceived + 1;
         projectList[projectId].amountOfDonationReceived += donationAmount;
@@ -120,9 +123,7 @@ contract Project {
     }
     
     modifier onlyAppointedInspector(uint256 projectId) {
-        // require(msg.sender == inspectorList[projectList[projectId].inspectorId].inspectorAddress, "Invalid inspector");
         address appointedInspectorAddress = registrationContract.getInspectorAddressById(projectList[projectId].inspectorId); 
-        
         require(msg.sender == appointedInspectorAddress, "Invalid inspector");
         _;
     }

@@ -45,7 +45,7 @@ contract Donation is ERC721 {
             confirmed: false
         });
         emit madeDonation(msg.sender, _charityOrgAddress, _amount);
-        projectContract.distributeDonation( _amount,  _projectId);
+        projectContract.distributeDonation( _amount, _projectId);
     }
 
     function confirmReceiveMoney(uint256 _donationId) public {

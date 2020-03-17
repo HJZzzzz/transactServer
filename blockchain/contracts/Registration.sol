@@ -56,6 +56,7 @@ contract Registration {
     uint256 _inspectorId = numInspectors++;
     Inspector storage inspector = inspectors[_inspectorAddress];
     inspectorList[_inspectorId] = inspector;
+    inspectorAddress[_inspectorId] = _inspectorAddress; 
     
     // Check that the inspector did not already exist:
     require(!inspector.set, 'You cannot add existing inspector.');
@@ -165,10 +166,23 @@ contract Registration {
   }
   
   function getNumOfInspectors() public view returns(uint256){
-      return numInspectors;
+    return numInspectors;
   }
   
   function getInspectorAddressById(uint256 inspectorId) public view returns(address){
-      return inspectorAddress[inspectorId];
+    return inspectorAddress[inspectorId];
   }
+
+  function getOrganizationIdByAddress(address organizationAddress) public view returns(uint256){
+    return organizations[organizationAddress].id; 
+  }
+
+  function getOwner() public view returns(address){
+    return owner;
+  }
+
+  function getInspectorAddress(uint256 inspectorId) public view returns(address){
+    return inspectorAddress[inspectorId]; 
+  }
+
 }
