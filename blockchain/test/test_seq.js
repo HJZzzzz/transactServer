@@ -192,6 +192,10 @@ contract(Registration, accounts => {
       
      });
 
+     //burn
+
+     //distribute
+
 
 
 });
