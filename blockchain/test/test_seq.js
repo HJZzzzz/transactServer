@@ -127,17 +127,55 @@ contract(Registration, accounts => {
       
      });
 
-     // create project
+     it("Should create charityOrg1", async() => {
+        await registration.registerOrganization(charityOrg1,"NUS_SOC",{from:charityOrg1});
+        let result1 = await registration.getOrganizationName(charityOrg1);
+        let result2 = await registration.approvedOrganization(charityOrg1);
+        // console.log('result', result);
+        assert.strictEqual(
+            result1,
+            "NUS_SOC",
+            'createOrganization() did not create Org 1'
+          );
 
-     // approve project
+          assert.strictEqual(
+            result2,
+            false,
+            'createOrganization() did not create Org 1'
+          ); 
+      
+     });
 
+     it("Should approve charity1 by inspector", async() => {
+        await registration.approveOrganization(charityOrg1,{from:inspector1});
+        let result = await registration.approvedOrganization(charityOrg1);
+        // console.log('result', result);
+        assert.strictEqual(
+            result,
+            true,
+            'approveOrganization() did not approve Org 1'
+          );
+      
+     });
+
+     it("CharityOrg1 should register project1", async() => {
+        let organizationId = await registration.getOrganizationIdByAddress(charityOrg1);
+        let result = await project.registerProject.call(organizationId, 1, 1, 80, {from: charityOrg1});
+        assert.strictEqual(
+            result.toNumber(),
+            0,
+            'register project() did not register Project 1'
+          );
+          await project.registerProject(organizationId, 1, 1, 80, {from: charityOrg1});  
+     });
+      
      it("Should make donation", async() => {
         await registration.registerDonor(donor2,"Holt",{from:donor2}); 
         await registration.approveDonor(donor2,{from:inspector1});
-        let result = await donation.makeDonation(charityOrg1, 100, {from:donor2});
+        let result = await donation.makeDonation(charityOrg1, 100, 0, {from:donor2});
         // console.log("result", result.logs[0].event);
         // Check event
-        assert.equal(result.logs[1].event,
+        assert.equal(result.logs[0].event,
         'madeDonation',
         'The madeDonation event is emitted');
       
