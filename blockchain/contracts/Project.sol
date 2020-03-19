@@ -11,7 +11,7 @@ contract Project {
     enum projectState { pending, approved, rejected }
     address _owner = msg.sender;
     struct CharityProject {
-        uint256 projectOrganizationId;
+        address projectOrganizationAdd;
         uint256 beneficiaryListId;
         uint256 projectDocumentationId; 
         
@@ -53,11 +53,11 @@ contract Project {
     //     return newInspectorId; 
     // }
     
-    function registerProject(uint256 organizationId, uint256 beneficiaryListId, uint256 documentationId, uint256 beneficiaryGainedRatio) public payable returns (uint256){
+    function registerProject(address organizationAdd, uint256 beneficiaryListId, uint256 documentationId, uint256 beneficiaryGainedRatio) public payable returns (uint256){
          require(registrationContract.approvedOrganization(msg.sender), 'Only approved organisation can create project.');
         uint256 numberOfInspectors = registrationContract.getNumOfInspectors();
         CharityProject memory newProject = CharityProject(
-            organizationId, 
+            organizationAdd, 
             beneficiaryListId, 
             documentationId,
             (uint256)(block.timestamp % numberOfInspectors), // random number generate assigned inspectorId 
@@ -115,6 +115,10 @@ contract Project {
 
     function getInspectorIdByProjectId(uint256 projectId) public view returns(uint256){
         return projectList[projectId].inspectorId;
+    }
+
+    function getOrganizationAddByProjectId(uint256 projectId) public view returns(address){
+        return projectList[projectId].projectOrganizationAdd;
     }
 
     function distributeDonation(uint256 donationAmount, uint256 projectId) public{
