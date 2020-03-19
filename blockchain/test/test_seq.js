@@ -168,6 +168,16 @@ contract(Registration, accounts => {
           );
           await project.registerProject(organizationId, 1, 1, 80, {from: charityOrg1});  
      });
+
+     it("Platform inspector should approve project1", async() => {
+      await project.approveProject(0, {from: inspector1});
+      let result = await project.checkProjectStatus(0);
+      assert.strictEqual(
+          result.toNumber(),
+          1,
+          'approve project() did not approve Project 1'
+        ); 
+    });
       
      it("Should make donation", async() => {
         await registration.registerDonor(donor2,"Holt",{from:donor2}); 
@@ -195,6 +205,8 @@ contract(Registration, accounts => {
      //burn
 
      //distribute
+
+     //reject project
 
 
 

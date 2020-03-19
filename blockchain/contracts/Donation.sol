@@ -35,6 +35,8 @@ contract Donation is ERC721 {
         uint256 _donationId = numDonations++;
         // Check that the donor did not already exist:
         require(registrationContract.approvedDonor(msg.sender), 'Only approved donor can make registration.');
+        
+        require( uint(projectContract.checkProjectStatus(_projectId)) == 1 , 'Can only make donation to approved project.');
         // Donation storage donation = donations[_donationId];
         // super._mint(msg.sender,_donationId);
         donations[_donationId] = Donation({
