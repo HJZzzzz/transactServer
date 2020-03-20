@@ -63,6 +63,74 @@ def approveDonor():
     dic = {"txn":txn}
     return jsonify(dic)
 
+@app.route("/registerOrganization", methods=['POST'])
+def registerOrganization():
+    charity = request.args.get("charityAddress")
+    print(charity)
+    txn = blockchainSetup.registerOrganization(charity)
+    dic = {"txn": txn}
+    return jsonify(dic)
+
+@app.route("/approveOrganization", methods=['POST'])
+def approveOrganization():
+    charity = request.args.get("charityAddress")
+    inspector = request.args.get("inspectorAddress")
+    print(charity)
+    print(inspector)
+    txn = blockchainSetup.approveOrganization(charity, inspector)
+    dic = {"txn": txn}
+    return jsonify(dic)
+
+@app.route("/rejectOrganization", methods=['POST'])
+def rejectOrganization():
+    charity = request.args.get("charityAddress")
+    inspector = request.args.get("inspectorAddress")
+    print(charity)
+    print(inspector)
+    txn = blockchainSetup.rejectOrganization(charity, inspector)
+    dic = {"txn": txn}
+    return jsonify(dic)
+
+@app.route("/updateOrganization", methods=['POST'])
+def updateOrganization():
+    charity = request.args.get("charityAddress")
+    print(charity)
+    txn = blockchainSetup.updateOrganization(charity)
+    dic = {"txn": txn}
+    return jsonify(dic)
+
+@app.route("/deleteOrganization", methods=['DELETE'])
+def deleteOrganization():
+    charity = request.args.get("charityAddress")
+    print(charity)
+    txn = blockchainSetup.deleteOrganization(charity)
+    dic = {"txn": txn}
+    return jsonify(dic)
+
+@app.route("/approvedOrganization", methods=['GET'])
+def approvedOrganization():
+    charity = request.args.get("charityAddress")
+    print(charity)
+    txn = blockchainSetup.approvedOrganization(charity)
+    dic = {"txn": txn}
+    return jsonify(dic)
+
+@app.route("/getOrganizationName", methods=['GET'])
+def getOrganizationName():
+    charity = request.args.get("charityAddress")
+    print(charity)
+    txn = blockchainSetup.getOrganizationName(charity)
+    dic = {"txn": txn}
+    return jsonify(dic)
+
+@app.route("/confirmReceiveMoney", methods=['POST'])
+def confirmReceiveMoney():
+    donation = request.args.get("donationId")
+    inspector = request.args.get("inspectorAddress")
+    print(donation)
+    txn = blockchainSetup.confirmReceiveMoney(donation, inspector)
+    dic = {"txn": txn}
+    return jsonify(dic)
 
 if __name__ == "__main__":
     app.run(debug=True)
