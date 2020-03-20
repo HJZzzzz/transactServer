@@ -159,20 +159,29 @@ contract(Registration, accounts => {
      });
 
      it("CharityOrg1 should register project1", async() => {
-        let organizationId = await registration.getOrganizationIdByAddress(charityOrg1);
-        let result = await project.registerProject.call(organizationId, 1, 1, 80, {from: charityOrg1});
+        let result = await project.registerProject.call(charityOrg1, 1, 1, 80, {from: charityOrg1});
         assert.strictEqual(
             result.toNumber(),
             0,
             'register project() did not register Project 1'
           );
-          await project.registerProject(organizationId, 1, 1, 80, {from: charityOrg1});  
+          await project.registerProject(charityOrg1, 1, 1, 80, {from: charityOrg1});  
      });
+
+     it("Platform inspector should approve project1", async() => {
+      await project.approveProject(0, {from: inspector1});
+      let result = await project.checkProjectStatus(0);
+      assert.strictEqual(
+          result.toNumber(),
+          1,
+          'approve project() did not approve Project 1'
+        ); 
+    });
       
      it("Should make donation", async() => {
         await registration.registerDonor(donor2,"Holt",{from:donor2}); 
         await registration.approveDonor(donor2,{from:inspector1});
-        let result = await donation.makeDonation(charityOrg1, 100, 0, {from:donor2});
+        let result = await donation.makeDonation(100, 0, {from:donor2});
         // console.log("result", result.logs[0].event);
         // Check event
         assert.equal(result.logs[0].event,
@@ -195,6 +204,8 @@ contract(Registration, accounts => {
      //burn
 
      //distribute
+
+     //reject project
 
 
 
