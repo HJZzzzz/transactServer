@@ -1,23 +1,29 @@
 from web3 import Web3
 import json
+from eth_typing import (
+    Address,
+    BlockNumber,
+    ChecksumAddress,
+    HexStr,
+)
 
 
 web3 = Web3(Web3.HTTPProvider("http://localhost:8545"))
 accounts = web3.eth.accounts
 
-# with open("./blockchain/build/contracts/Project.json") as project:
-#     info_json = json.load(project)
-# abi = info_json["abi"]
+with open("./blockchain/build/contracts/Project.json") as project:
+    info_json = json.load(project)
+abi = info_json["abi"]
 
-# projectContractAddress = '0x748E9E7fd703D4b3609c5DDdCc9CD856C87410f1'
-# projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
+projectContractAddress = '0x97885FDa2f5C9bDCaC5Ba38F20035Ffe7368F847'
+projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
 
 with open("./blockchain/build/contracts/Registration.json") as regist:
     info_json = json.load(regist)
 abi = info_json["abi"]
 
-registrationContractAddress = '0xe9E8785BCF7597c281da40Afdb4e0fc3a4260F2E'
+registrationContractAddress = '0x4e817B5a2eEe5bc2852f26c9960915eC891B44e4'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -25,10 +31,49 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
     info_json = json.load(donation)
 abi = info_json["abi"]
 
-donationContractAddress = '0x4EA0DB8c3EF54e8Cc8b22A759b7A705cE1c0CAC0'
+donationContractAddress = '0xcb18DC5194C805F755b33C7Adc1c40Fdee261A94'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
 
-def makeDonation(charity, amount):
-    txn = donationContract.functions.add(charity,amount).transact({'from':accounts[0],'value':web3.toWei(1,'ether')})
-    print(txn)
+def make_donation(charity, amount, pid, donor):
+    txn = donationContract.functions.makeDonation(charity, amount, pid)
+    txn = txn.transact({'from': donor})
+    receipt = web3.eth.waitForTransactionReceipt(txn)
+    print(receipt)
+    return receipt.transactionHash.hex()
+
+
+
+def registerInspector(address):
+    # 0x95231d6698314d6962ff55f9e518a7e4880b10a66f91c4cb38c88ac769ade1a9
+    # print(address)
+    # print(type(address))
+    # print(accounts[0])
+    # print(type(accounts[0]))
+    txn = registrationContract.functions.registerInspector(address, "inspector").transact({'from': accounts[0]})
+    receipt = web3.eth.waitForTransactionReceipt(txn)
+    # print("111")
+    # print(txn)
+    # print(type(txn))
+    # print("222")
+    # print(receipt)
+    print(receipt.transactionHash)
+    print(type(receipt.transactionHash))
+    # print(receipt['from'])
+    # print(receipt['to'])
+
+    return receipt.transactionHash.hex()
+
+
+def registerDonor(donor):
+    txn = registrationContract.functions.registerDonor(donor,"dornor acct1").transact({'from':donor})
+    receipt = web3.eth.waitForTransactionReceipt(txn)
+    print(receipt)
+    return receipt.transactionHash.hex()
+
+
+def approveDonor(donor,inspector):
+    txn = registrationContract.functions.approveDonor(donor).transact({'from':inspector})
+    receipt = web3.eth.waitForTransactionReceipt(txn)
+    print(receipt)
+    return receipt.transactionHash.hex()
