@@ -78,11 +78,13 @@ def approveDonor(donor,inspector):
     print(receipt)
     return receipt.transactionHash.hex()
 
+
 def registerOrganization(charity):
     txn = registrationContract.functions.registerOrganization(charity, "charity organization acct1").transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     print(receipt)
     return receipt.transactionHash.hex()
+
 
 def approveOrganization(charity, inspector):
     txn = registrationContract.functions.approveOrganization(charity).transact({'from': inspector})
@@ -90,11 +92,13 @@ def approveOrganization(charity, inspector):
     print(receipt)
     return receipt.transactionHash.hex()
 
+
 def rejectOrganization(charity, inspector):
     txn = registrationContract.functions.rejectOrganization(charity).transact({'from': inspector})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     print(receipt)
     return receipt.transactionHash.hex()
+
 
 def updateOrganization(charity):
     txn = registrationContract.functions.updateOrganization(charity, "charity organization acct2").transact({'from': charity})
@@ -102,23 +106,47 @@ def updateOrganization(charity):
     print(receipt)
     return receipt.transactionHash.hex()
 
+
 def deleteOrganization(charity):
     txn = registrationContract.functions.deleteOrganization(charity).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     print(receipt)
     return receipt.transactionHash.hex()
 
+
 def approvedOrganization(charity):
     txn = registrationContract.functions.approvedOrganization(charity).call({'from': charity})
     return txn
 
+
 def getOrganizationName(charity):
     txn = registrationContract.functions.getOrganizationName(charity).call({'from': charity})
     return txn
+
 
 def confirmReceiveMoney(donation, charity):
     txn = donationContract.functions.confirmReceiveMoney(donation).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     print(receipt)
     return receipt.transactionHash.hex()
+
+
+
+def registerProject(charity, organizationId, beneficiaryListId, documentationId, beneficiaryGainedRatio):
+    txn = projectContract.functions.registerProject(charity, organizationId, beneficiaryListId, documentationId, beneficiaryGainedRatio).transact({'from': charity})
+    receipt = web3.eth.waitForTransactionReceipt(txn)
+    return receipt.transactionHash.hex()
+
+
+def approveProject(inspector, projectId):
+    txn = projectContract.functions.approveProject(projectId).call({'from': inspector})
+    receipt = web3.eth.waitForTransactionReceipt(txn)
+    return receipt.transactionHash.hex()
+
+
+def rejectProject(inspector, projectId):
+    txn = projectContract.functions.rejectProject(projectId).call({'from': inspector})
+    receipt = web3.eth.waitForTransactionReceipt(txn)
+    return receipt.transactionHash.hex()
+
 

@@ -132,6 +132,34 @@ def confirmReceiveMoney():
     dic = {"txn": txn}
     return jsonify(dic)
 
+@app.route("/registerProject", methods=['POST'])
+def registerProject():
+    charity = request.args.get("charityAddress")
+    organizationId = request.args.get('organizationId')
+    beneficiaryListId = request.args.get('beneficiaryListId')
+    documentationId = request.args.get('documentationId')
+    beneficiaryGainedRatio = request.args.get('beneficiaryGainedRatio')
+    
+    txn = blockchainSetup.registerProject(charity, organizationId, beneficiaryListId, documentationId, beneficiaryGainedRatio)
+    dic = {"txn": txn}
+    return jsonify(dic)
+
+@app.route("/approveProject", methods=['POST'])
+def approveProject():
+    project = request.args.get('projectId')
+    inspector = request.args.get('inspectorAddress')
+    txn = blockchainSetup.approveProject(inspector, project)
+    dic = {"txn": txn}
+    return jsonify(dic)
+
+@app.route("/rejectProject", methods=['POST'])
+def rejectProject():
+    project = request.args.get('projectId')
+    inspector = request.args.get('inspectorAddress')
+    txn = blockchainSetup.rejectProject(inspector, project)
+    dic = {"txn": txn}
+    return jsonify(dic)
+
 if __name__ == "__main__":
     app.run(debug=True)
 
