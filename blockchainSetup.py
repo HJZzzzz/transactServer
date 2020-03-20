@@ -109,16 +109,12 @@ def deleteOrganization(charity):
     return receipt.transactionHash.hex()
 
 def approvedOrganization(charity):
-    txn = registrationContract.functions.approvedOrganization(charity).transact({'from': charity})
-    receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
-    return receipt.transactionHash.hex()
+    txn = registrationContract.functions.approvedOrganization(charity).call({'from': charity})
+    return txn
 
 def getOrganizationName(charity):
-    txn = registrationContract.functions.getOrganizationName(charity).transact({'from': charity})
-    receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
-    return receipt.transactionHash.hex()
+    txn = registrationContract.functions.getOrganizationName(charity).call({'from': charity})
+    return txn
 
 def confirmReceiveMoney(donation, charity):
     txn = donationContract.functions.confirmReceiveMoney(donation).transact({'from': charity})
