@@ -5235,7 +5235,11 @@
       "address": "0x5C2A68ca26C83489E6CeF749683458a8E2356316",
       "transactionHash": "0xc666bb7e3b2c5df8ae8f1cc78efecc3bd777c7fd1c308fb6d672424d1e117678"
     },
+<<<<<<< HEAD
     "1584272993677": {
+=======
+    "1584426195335": {
+>>>>>>> 65faf6464156f1d4f7397484e4ddd6c96d787e77
       "events": {
         "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925": {
           "anonymous": false,
@@ -5314,6 +5318,7 @@
         }
       },
       "links": {},
+<<<<<<< HEAD
       "address": "0x327dBe19858B4AE5484085c6D6c715f5d6BB9De7",
       "transactionHash": "0x52a4b36ba528ee067b32521f8c3b5ceae87d4780791e8abcba1f1e637db81d12"
     },
@@ -5402,6 +5407,14 @@
   },
   "schemaVersion": "3.0.23",
   "updatedAt": "2020-03-15T12:44:49.164Z",
+=======
+      "address": "0x2B848718A9de49a14C6667eD80ca5E0d148aB074",
+      "transactionHash": "0xd9f7fd90add8ee5067fa4e040c87671f82d789c33f0c1ca61515b631ff0751b1"
+    }
+  },
+  "schemaVersion": "3.0.23",
+  "updatedAt": "2020-03-17T06:29:27.983Z",
+>>>>>>> 65faf6464156f1d4f7397484e4ddd6c96d787e77
   "networkType": "ethereum",
   "devdoc": {
     "methods": {
