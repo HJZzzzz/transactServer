@@ -135,12 +135,11 @@ def confirmReceiveMoney():
 @app.route("/registerProject", methods=['POST'])
 def registerProject():
     charity = request.args.get("charityAddress")
-    organizationId = request.args.get('organizationId')
     beneficiaryListId = request.args.get('beneficiaryListId')
     documentationId = request.args.get('documentationId')
     beneficiaryGainedRatio = request.args.get('beneficiaryGainedRatio')
     
-    txn = blockchainSetup.registerProject(charity, organizationId, beneficiaryListId, documentationId, beneficiaryGainedRatio)
+    txn = blockchainSetup.registerProject(charity, beneficiaryListId, documentationId, beneficiaryGainedRatio)
     dic = {"txn": txn}
     return jsonify(dic)
 

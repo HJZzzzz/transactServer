@@ -122,8 +122,8 @@ def confirmReceiveMoney(donation, charity):
     print(receipt)
     return receipt.transactionHash.hex()
 
-def registerProject(charity, organizationId, beneficiaryListId, documentationId, beneficiaryGainedRatio):
-    txn = projectContract.functions.registerProject(charity, organizationId, beneficiaryListId, documentationId, beneficiaryGainedRatio).transact({'from': charity})
+def registerProject(charity, beneficiaryListId, documentationId, beneficiaryGainedRatio):
+    txn = projectContract.functions.registerProject(charity, beneficiaryListId, documentationId, beneficiaryGainedRatio).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     return receipt.transactionHash.hex()
 
