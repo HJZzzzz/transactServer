@@ -73,7 +73,7 @@ contract(Registration, accounts => {
      });
 
      it("Should reject donor1 by inspector", async() => {
-        await registration.rejectDonor(donor1,{from:inspector1});
+        let _event = await registration.rejectDonor(donor1,{from:inspector1});
         let result = await registration.approvedDonor(donor1);
         // console.log('result', result);
         assert.strictEqual(
@@ -81,6 +81,10 @@ contract(Registration, accounts => {
             false,
             'rejectDonor() did not reject Donor 1'
           );
+
+        assert.equal(_event.logs[0].event,
+        'rejectedDonor',
+        'The rejectDonor event is emitted'); 
       
      });
 
@@ -98,7 +102,7 @@ contract(Registration, accounts => {
      });
 
      it("Should delete donor1", async() => {
-        await registration.deleteDonor(donor1,{from:donor1});
+        let _event = await registration.deleteDonor(donor1,{from:donor1});
         let result = await registration.approvedDonor(donor1);
         // console.log('result', result);
         assert.strictEqual(
@@ -106,6 +110,10 @@ contract(Registration, accounts => {
             false,
             'deleteDonor() did not delete Donor 1'
           );
+
+        assert.equal(_event.logs[0].event,
+        'deletedDonor',
+        'The deleteDonor event is emitted');  
       
      });
 
@@ -130,10 +138,10 @@ contract(Registration, accounts => {
      it("Should make registration", async() => {
         await registration.registerDonor(donor2,"Holt",{from:donor2}); 
         await registration.approveDonor(donor2,{from:inspector1});
-        let result = await donation.makeDonation(charityOrg1, 100, {from:donor2});
+        let result = await donation.makeDonation(charityOrg1, 100, 0, {from:donor2});
         // console.log("result", result.logs[0].event);
         // Check event
-        assert.equal(result.logs[1].event,
+        assert.equal(result.logs[0].event,
         'madeDonation',
         'The madeDonation event is emitted');
       
@@ -149,7 +157,5 @@ contract(Registration, accounts => {
         'The confirmReceiveMoney() does not confirm receipt of Money.');
       
      });
-
-
 
 });

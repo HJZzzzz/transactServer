@@ -36,6 +36,8 @@ contract Registration {
   uint256 public numInspectors = 0;
   uint256 numOrganizations = 0;
 
+  event rejectedDonor(uint256 id, string name);
+  event deletedDonor(uint256 id, string name);
 
   modifier onlyOwner() {
       require(msg.sender == owner);
@@ -85,6 +87,7 @@ contract Registration {
 
   function rejectDonor(address _donorAddress) public onlyInspector{
     donors[_donorAddress].set = false;
+    emit rejectedDonor(donors[_donorAddress].id, donors[_donorAddress].name);
     //should we delete account?
   }
 
@@ -104,6 +107,7 @@ contract Registration {
     Donor storage donor = donors[_donorAddress];
     require(donor.set, 'You cannot delete non-existing donor.');
     delete donors[_donorAddress];
+    emit deletedDonor(donors[_donorAddress].id, donors[_donorAddress].name);
   }
 
   function approvedDonor(address _donorAddress) public view returns (bool){

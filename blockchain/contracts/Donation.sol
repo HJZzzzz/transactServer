@@ -64,4 +64,15 @@ contract Donation is ERC721 {
         return donations[_donationId].confirmed;
     
     }
+
+    function viewDonation(uint256 _donationId) public view returns (uint, string memory, string memory){
+        address donorAdd = donations[_donationId].from;
+        address charityAdd = donations[_donationId].to;
+        string memory donorName = registrationContract.getDonorName(donorAdd);
+        string memory charityName = registrationContract.getOrganizationName(charityAdd);
+
+        return (donations[_donationId].amount, donorName, charityName);
+    
+    }
+
 }
