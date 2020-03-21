@@ -63,6 +63,7 @@ def approveDonor():
     dic = {"txn":txn}
     return jsonify(dic)
 
+
 @app.route("/registerOrganization", methods=['POST'])
 def registerOrganization():
     charity = request.args.get("charityAddress")
@@ -70,6 +71,7 @@ def registerOrganization():
     txn = blockchainSetup.registerOrganization(charity)
     dic = {"txn": txn}
     return jsonify(dic)
+
 
 @app.route("/approveOrganization", methods=['POST'])
 def approveOrganization():
@@ -81,6 +83,7 @@ def approveOrganization():
     dic = {"txn": txn}
     return jsonify(dic)
 
+
 @app.route("/rejectOrganization", methods=['POST'])
 def rejectOrganization():
     charity = request.args.get("charityAddress")
@@ -91,6 +94,7 @@ def rejectOrganization():
     dic = {"txn": txn}
     return jsonify(dic)
 
+
 @app.route("/updateOrganization", methods=['POST'])
 def updateOrganization():
     charity = request.args.get("charityAddress")
@@ -98,6 +102,7 @@ def updateOrganization():
     txn = blockchainSetup.updateOrganization(charity)
     dic = {"txn": txn}
     return jsonify(dic)
+
 
 @app.route("/deleteOrganization", methods=['DELETE'])
 def deleteOrganization():
@@ -107,6 +112,7 @@ def deleteOrganization():
     dic = {"txn": txn}
     return jsonify(dic)
 
+
 @app.route("/approvedOrganization", methods=['GET'])
 def approvedOrganization():
     charity = request.args.get("charityAddress")
@@ -114,6 +120,7 @@ def approvedOrganization():
     txn = blockchainSetup.approvedOrganization(charity)
     dic = {"txn": txn}
     return jsonify(dic)
+
 
 @app.route("/getOrganizationName", methods=['GET'])
 def getOrganizationName():
@@ -123,6 +130,7 @@ def getOrganizationName():
     dic = {"txn": txn}
     return jsonify(dic)
 
+
 @app.route("/confirmReceiveMoney", methods=['POST'])
 def confirmReceiveMoney():
     donation = request.args.get("donationId")
@@ -131,6 +139,7 @@ def confirmReceiveMoney():
     txn = blockchainSetup.confirmReceiveMoney(donation, inspector)
     dic = {"txn": txn}
     return jsonify(dic)
+
 
 @app.route("/registerProject", methods=['POST'])
 def registerProject():
@@ -143,6 +152,7 @@ def registerProject():
     dic = {"txn": txn}
     return jsonify(dic)
 
+
 @app.route("/approveProject", methods=['POST'])
 def approveProject():
     project = request.args.get('projectId')
@@ -150,6 +160,7 @@ def approveProject():
     txn = blockchainSetup.approveProject(inspector, project)
     dic = {"txn": txn}
     return jsonify(dic)
+
 
 @app.route("/rejectProject", methods=['POST'])
 def rejectProject():

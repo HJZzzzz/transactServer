@@ -45,7 +45,6 @@ def make_donation(charity, amount, pid, donor):
 
 
 def registerInspector(address):
-    # 0x95231d6698314d6962ff55f9e518a7e4880b10a66f91c4cb38c88ac769ade1a9
     # print(address)
     # print(type(address))
     # print(accounts[0])
