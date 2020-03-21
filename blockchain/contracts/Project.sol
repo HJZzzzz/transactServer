@@ -38,7 +38,7 @@ contract Project {
     uint256 numProjects; 
     uint256 numChecks; 
     
-    function registerProject(uint256 organizationId, uint256 beneficiaryListId, uint256 documentationId, uint256 beneficiaryGainedRatio) public payable returns (uint256){
+    function registerProject(address organizationAdd, uint256 beneficiaryListId, uint256 documentationId, uint256 beneficiaryGainedRatio) public payable returns (uint256){
         require(registrationContract.approvedOrganization(msg.sender), 'Only approved organisation can create project.');
         uint256 numberOfInspectors = registrationContract.getNumOfInspectors();
         CharityProject memory newProject = CharityProject(
