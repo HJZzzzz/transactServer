@@ -73,7 +73,7 @@ contract(Registration, accounts => {
      });
 
      it("Should reject donor1 by inspector", async() => {
-        let _event = await registration.rejectDonor(donor1,{from:inspector1});
+        await registration.rejectDonor(donor1,{from:inspector1});
         let result = await registration.approvedDonor(donor1);
         // console.log('result', result);
         assert.strictEqual(
@@ -81,10 +81,6 @@ contract(Registration, accounts => {
             false,
             'rejectDonor() did not reject Donor 1'
           );
-
-        assert.equal(_event.logs[0].event,
-        'rejectedDonor',
-        'The rejectDonor event is emitted'); 
       
      });
 
@@ -102,7 +98,7 @@ contract(Registration, accounts => {
      });
 
      it("Should delete donor1", async() => {
-        let _event = await registration.deleteDonor(donor1,{from:donor1});
+        await registration.deleteDonor(donor1,{from:donor1});
         let result = await registration.approvedDonor(donor1);
         // console.log('result', result);
         assert.strictEqual(
@@ -110,10 +106,6 @@ contract(Registration, accounts => {
             false,
             'deleteDonor() did not delete Donor 1'
           );
-
-        assert.equal(_event.logs[0].event,
-        'deletedDonor',
-        'The deleteDonor event is emitted');  
       
      });
 
@@ -135,10 +127,63 @@ contract(Registration, accounts => {
       
      });
 
-     it("Should make registration", async() => {
+     it("Should create charityOrg1", async() => {
+        await registration.registerOrganization(charityOrg1,"NUS_SOC",{from:charityOrg1});
+        let result1 = await registration.getOrganizationName(charityOrg1);
+        let result2 = await registration.approvedOrganization(charityOrg1);
+        // console.log('result', result);
+        assert.strictEqual(
+            result1,
+            "NUS_SOC",
+            'createOrganization() did not create Org 1'
+          );
+
+          assert.strictEqual(
+            result2,
+            false,
+            'createOrganization() did not create Org 1'
+          ); 
+      
+     });
+
+     it("Should approve charity1 by inspector", async() => {
+        await registration.approveOrganization(charityOrg1,{from:inspector1});
+        let result = await registration.approvedOrganization(charityOrg1);
+        // console.log('result', result);
+        assert.strictEqual(
+            result,
+            true,
+            'approveOrganization() did not approve Org 1'
+          );
+      
+     });
+
+     it("CharityOrg1 should register project1", async() => {
+        let result = await project.registerProject.call(charityOrg1, 1, 1, 80, {from: charityOrg1});
+        assert.strictEqual(
+            result.toNumber(),
+            0,
+            'register project() did not register Project 1'
+          );
+          await project.registerProject(charityOrg1, 1, 1, 80, {from: charityOrg1});  
+     });
+
+     it("Platform inspector should approve project1", async() => {
+      let inspectorId = project.getInspectorIdByProjectId;
+      let inspectorAddress = registration.getInspectorAddressById(inspectorId);
+      await project.approveProject(0, {from: inspectorAddress});
+      let result = await project.checkProjectStatus(0);
+      assert.strictEqual(
+          result.toNumber(),
+          1,
+          'approve project() did not approve Project 1'
+        ); 
+    });
+      
+     it("Should make donation", async() => {
         await registration.registerDonor(donor2,"Holt",{from:donor2}); 
         await registration.approveDonor(donor2,{from:inspector1});
-        let result = await donation.makeDonation(charityOrg1, 100, 0, {from:donor2});
+        let result = await donation.makeDonation(100, 0, {from:donor2});
         // console.log("result", result.logs[0].event);
         // Check event
         assert.equal(result.logs[0].event,
@@ -157,5 +202,13 @@ contract(Registration, accounts => {
         'The confirmReceiveMoney() does not confirm receipt of Money.');
       
      });
+
+     //burn
+
+     //distribute
+
+     //reject project
+
+
 
 });
