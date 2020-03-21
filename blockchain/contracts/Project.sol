@@ -11,7 +11,7 @@ contract Project {
     enum projectState { pending, approved, rejected }
     address _owner = msg.sender;
     struct CharityProject {
-        uint256 projectOrganizationId;
+        address projectOrganizationAdd;
         uint256 beneficiaryListId;
         uint256 projectDocumentationId; 
         
@@ -23,11 +23,7 @@ contract Project {
         uint256 amountOfDonationReceived; 
         uint256 amountOfDonationBeneficiaryReceived; 
     }
-    
-    // struct Inspector {
-    //     address inspectorAddress; 
-    // }
-    
+
     struct Check {
         uint256 projectId;
         uint256 inspectorId; 
@@ -35,29 +31,18 @@ contract Project {
         string reason; 
     }
     
-    // mapping(uint256 => Inspector) inspectorList;
     mapping(uint256 => Check) checkingList; 
     mapping(uint256 => uint256) projectCheckingDetails; 
-    mapping(uint256 => CharityProject) projectList; 
+    mapping(uint256 => CharityProject) public projectList; 
     
-    // uint256 numInspectors; 
     uint256 numProjects; 
     uint256 numChecks; 
     
-    // function registerInspector(address inspectorAddress) public payable onlyOwner returns (uint256){
-        
-    //     Inspector memory newInspector = Inspector(inspectorAddress); 
-    //     uint256 newInspectorId = numInspectors++;
-    //     inspectorList[newInspectorId] = newInspector; 
-        
-    //     return newInspectorId; 
-    // }
-    
-    function registerProject(uint256 organizationId, uint256 beneficiaryListId, uint256 documentationId, uint256 beneficiaryGainedRatio) public payable returns (uint256){
-         require(registrationContract.approvedOrganization(msg.sender), 'Only approved organisation can create project.');
+    function registerProject(address organizationAdd, uint256 beneficiaryListId, uint256 documentationId, uint256 beneficiaryGainedRatio) public payable returns (uint256){
+        require(registrationContract.approvedOrganization(msg.sender), 'Only approved organisation can create project.');
         uint256 numberOfInspectors = registrationContract.getNumOfInspectors();
         CharityProject memory newProject = CharityProject(
-            organizationId, 
+            organizationAdd, 
             beneficiaryListId, 
             documentationId,
             (uint256)(block.timestamp % numberOfInspectors), // random number generate assigned inspectorId 
@@ -115,6 +100,10 @@ contract Project {
 
     function getInspectorIdByProjectId(uint256 projectId) public view returns(uint256){
         return projectList[projectId].inspectorId;
+    }
+
+    function getOrganizationAddByProjectId(uint256 projectId) public view returns(address){
+        return projectList[projectId].projectOrganizationAdd;
     }
 
     function distributeDonation(uint256 donationAmount, uint256 projectId) public{
