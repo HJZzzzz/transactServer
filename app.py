@@ -3,6 +3,7 @@ from flask_cors import CORS
 from pymongo import MongoClient
 import blockchainSetup
 from blockchainSetup import  web3
+from pymongo.errors import ConnectionFailure
 
 app = Flask(__name__)
 title = "TransACT Server"
@@ -48,8 +49,27 @@ def registerDonor():
     address = request.args.get("donorAddress")
     print(address)
     # address1 = request.args.get("inspectorAddress")
-    txn = blockchainSetup.registerDonor(address)
-    dic = {"txn": txn}
+    # txn = blockchainSetup.registerDonor(address)
+    txn = "0xDFf54f5D3102e683B692EDfa9Cc644d4E05190ab"
+    new_donor = {
+        "username": "Jingzhan",
+        "password": "123456",
+        "eth_address": address,
+        "bank_account": "123456",
+        "physical_address": "sg",
+        "full_name": "Huang Jingzhan",
+        "contact_number": "12345678",
+        "financial_info": "poor man",
+        "registration_hash": txn
+    }
+    donor_id = ''
+    try:
+        donor_id = db.donors.insert_one(new_donor)
+    except ConnectionFailure:
+        print("Server not available")
+
+    dic = {"donor": donor_id}
+
     return jsonify(dic)
 
 
