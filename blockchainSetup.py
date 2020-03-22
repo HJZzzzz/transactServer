@@ -15,7 +15,7 @@ with open("./blockchain/build/contracts/Project.json") as project:
     info_json = json.load(project)
 abi = info_json["abi"]
 
-projectContractAddress = '0x8845d0b205d233fa6AF8ED1356C358862a0e962D'
+projectContractAddress = '0x3F29Ffd12093C3b41C1aF26217E05978e0d5d028'
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
 
@@ -23,7 +23,7 @@ with open("./blockchain/build/contracts/Registration.json") as regist:
     info_json = json.load(regist)
 abi = info_json["abi"]
 
-registrationContractAddress = '0x667B382C992E1704114dBADb5dE0A7Da501f8b2A'
+registrationContractAddress = '0x3ac55102898Dcab3658FcF79088280E50799aD86'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -31,7 +31,7 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
     info_json = json.load(donation)
 abi = info_json["abi"]
 
-donationContractAddress = '0x48d06fFA5F3FA4b54fF715E55A05982a41D7c90C'
+donationContractAddress = '0x9F5E6b96d4824AcC7Db927E6633D2E5E21ce89a3'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
 
@@ -147,4 +147,13 @@ def rejectProject(inspector, projectId):
     receipt = web3.eth.waitForTransactionReceipt(txn)
     return receipt.transactionHash.hex()
 
+
+def checkDonorApproval(txn_hash):
+    try:
+        receipt = web3.eth.getTransactionReceipt(txn_hash)
+        logs = registrationContract.events.DonorApproval().processReceipt(receipt)
+        return True
+    except Exception as ex:
+        print(ex)
+        return False
 

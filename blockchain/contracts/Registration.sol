@@ -36,7 +36,7 @@ contract Registration {
   uint256 public numInspectors = 0;
   uint256 numOrganizations = 0;
 
-event DonorApproval(address dornor, address inspector);
+event DonorApproval(address donor, address inspector);
 
   modifier onlyOwner() {
       require(msg.sender == owner);
