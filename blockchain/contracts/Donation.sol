@@ -18,6 +18,7 @@ contract Donation is ERC721 {
     mapping(uint256 => Donation) public donations;
 
     event madeDonation(address donor, address charityOrg, uint amount);
+    event DonationConfirmed(uint donationId);
 
     struct Donation {
         uint id;
@@ -65,6 +66,6 @@ contract Donation is ERC721 {
     
     function confirmedDonation(uint256 _donationId) public view returns (bool){
         return donations[_donationId].confirmed;
-    
+        emit DonationConfirmed(_donationId);
     }
 }

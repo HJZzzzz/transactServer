@@ -37,6 +37,7 @@ contract Registration {
   uint256 numOrganizations = 0;
 
 event DonorApproval(address donor, address inspector);
+event OrganizationApproval(address organization, address inspector);
 
   modifier onlyOwner() {
       require(msg.sender == owner);
@@ -138,6 +139,7 @@ event DonorApproval(address donor, address inspector);
 
   function approveOrganization(address _organizationAddress) public onlyInspector{
     organizations[_organizationAddress].set = true;
+    emit OrganizationApproval(_organizationAddress, msg.sender);
   }
 
   function rejectOrganization(address _organizationAddress) public onlyInspector{

@@ -78,8 +78,8 @@ def approveDonor(donor,inspector):
     return receipt.transactionHash.hex()
 
 
-def registerOrganization(charity):
-    txn = registrationContract.functions.registerOrganization(charity, "charity organization acct1").transact({'from': charity})
+def registerOrganization(charity, name):
+    txn = registrationContract.functions.registerOrganization(charity, name).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     print(receipt)
     return receipt.transactionHash.hex()
@@ -99,8 +99,8 @@ def rejectOrganization(charity, inspector):
     return receipt.transactionHash.hex()
 
 
-def updateOrganization(charity):
-    txn = registrationContract.functions.updateOrganization(charity, "charity organization acct2").transact({'from': charity})
+def updateOrganization(charity, name):
+    txn = registrationContract.functions.updateOrganization(charity, name).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     print(receipt)
     return receipt.transactionHash.hex()

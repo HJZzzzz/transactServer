@@ -25,13 +25,32 @@ def testGet():
 
 @app.route("/makeDonation", methods=['POST'])
 def donate():
-    charity = request.args.get("charityAddress")
-    amount = request.args.get("amount")
-    pid = request.args.get("projectId")
-    donor = request.args.get("donorAddress")
-    txn = blockchainSetup.make_donation(charity, amount, pid,donor)
-    dic = {"txn": txn}
-    return jsonify(dic)
+
+    try:
+        charity = request.args.get("charityAddress")
+        amount = request.args.get("amount")
+        pid = request.args.get("projectId")
+        donor = request.args.get("donorAddress")
+        txn = blockchainSetup.make_donation(charity, amount, pid,donor)
+        new_donation = {
+            "amount": request.form.get("amount"),
+            "project_id": request.form.get("project_id"),
+            "donor_address": request.form.get("donor_address"),
+            "donation_hash": txn,
+            "confirmed_hash": ''
+        }
+
+        donation_id = db.donations.insert_one(new_donation)
+    
+    except Exception as ex:
+        print(ex)
+        print(type(ex))
+        return jsonify(
+            {"error": str(ex)}
+        )
+
+    print(donation_id)
+    return jsonify(200)
 
 
 @app.route("/registerInspector", methods=['POST'])
@@ -95,7 +114,7 @@ def approveDonor():
             {"$set":{
                 "approval_hash":txn
             }
-             },upsert=True
+            }
         )
         # dic = {"txn": txn}
         return jsonify(200)
@@ -110,7 +129,7 @@ def registerOrganization():
 
     try:
 
-        txn = blockchainSetup.registerOrganization(charity)
+        txn = blockchainSetup.registerOrganization(charity, request.form.get("full_name"))
         new_charity = {
             "username": request.form.get("username"),
             "password": request.form.get("password"),
@@ -125,7 +144,7 @@ def registerOrganization():
             "registration_hash": txn,
             "approval_hash":''
         }
-        charity_id = db.donors.insert_one(new_charity)
+        charity_id = db.charities.insert_one(new_charity)
     except Exception as ex:
         print(ex)
         print(type(ex))
@@ -141,42 +160,100 @@ def registerOrganization():
 
 @app.route("/approveOrganization", methods=['POST'])
 def approveOrganization():
+
+    charities = db.charities
+
     charity = request.args.get("charityAddress")
     inspector = request.args.get("inspectorAddress")
-    print(charity)
-    print(inspector)
-    txn = blockchainSetup.approveOrganization(charity, inspector)
-    dic = {"txn": txn}
-    return jsonify(dic)
+
+    try:
+        txn = blockchainSetup.approveOrganization(charity, inspector)
+
+        result = charities.find_one_and_update(
+            {"eth_address": charity},
+            {"$set":{
+                "approval_hash":txn
+            }
+            }
+        )
+        # dic = {"txn": txn}
+        return jsonify(200)
+    except Exception as ex:
+        return jsonify({"error":str(ex)})
 
 
 @app.route("/rejectOrganization", methods=['POST'])
 def rejectOrganization():
+
+    charities = db.charities
+
     charity = request.args.get("charityAddress")
     inspector = request.args.get("inspectorAddress")
-    print(charity)
-    print(inspector)
-    txn = blockchainSetup.rejectOrganization(charity, inspector)
-    dic = {"txn": txn}
-    return jsonify(dic)
+
+    try:
+        txn = blockchainSetup.rejectOrganization(charity, inspector)
+
+        result = charities.find_one_and_update(
+            {"eth_address": charity},
+            {"$set":{
+                "approval_hash":txn
+            }
+            }
+        )
+        # dic = {"txn": txn}
+        return jsonify(200)
+    except Exception as ex:
+        return jsonify({"error":str(ex)})
 
 
 @app.route("/updateOrganization", methods=['POST'])
 def updateOrganization():
-    charity = request.args.get("charityAddress")
-    print(charity)
-    txn = blockchainSetup.updateOrganization(charity)
-    dic = {"txn": txn}
-    return jsonify(dic)
+
+    charities = db.charities
+
+    charity = request.form.get("charityAddress")
+
+    try:
+        txn = blockchainSetup.updateOrganization(charity, request.form.get("full_name"))
+
+        result = charities.find_one_and_update(
+            {"eth_address": charity},
+            {"$set":{
+                "username": request.form.get("username"),
+                "password": request.form.get("password"),
+                "email": request.form.get("email"),
+                "bank_account": request.form.get("bank_account"),
+                "physical_address": request.form.get("physical_address"),
+                "name": request.form.get("full_name"),
+                "contact_number": request.form.get("contact_number"),
+                "financial_info": request.form.get("financial_info"),
+                "description": request.form.get("description"),
+            }
+            }
+        )
+        # dic = {"txn": txn}
+        return jsonify(200)
+    except Exception as ex:
+        return jsonify({"error":str(ex)})
 
 
 @app.route("/deleteOrganization", methods=['DELETE'])
 def deleteOrganization():
+
+    charities = db.charities
+
     charity = request.args.get("charityAddress")
-    print(charity)
-    txn = blockchainSetup.deleteOrganization(charity)
-    dic = {"txn": txn}
-    return jsonify(dic)
+    
+    try:
+        txn = blockchainSetup.deleteOrganization(charity)
+
+        result = charities.delete_one(
+            {"eth_address": charity}
+        )
+
+        return jsonify(200)
+    except Exception as ex:
+        return jsonify({"error":str(ex)})
 
 
 @app.route("/approvedOrganization", methods=['GET'])
@@ -199,12 +276,21 @@ def getOrganizationName():
 
 @app.route("/confirmReceiveMoney", methods=['POST'])
 def confirmReceiveMoney():
+    donations = db.donations
     donation = request.args.get("donationId")
     inspector = request.args.get("inspectorAddress")
-    print(donation)
-    txn = blockchainSetup.confirmReceiveMoney(donation, inspector)
-    dic = {"txn": txn}
-    return jsonify(dic)
+    try:
+        txn = blockchainSetup.confirmReceiveMoney(donation, inspector)
+        result = donations.find_one_and_update(
+            {"_id": ObjectId(request.form.get("id"))},
+            {"$set":{
+                "comfirmed_hash": txn
+            }
+            }
+        )
+        return jsonify(200)
+    except Exception as ex:
+        return jsonify({"error":str(ex)})
 
 
 @app.route("/registerProject", methods=['POST'])
