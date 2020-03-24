@@ -47,7 +47,6 @@ def registerInspector():
 
 @app.route("/registerDonor", methods=['POST'])
 def registerDonor():
-
     donor_id = ''
     try:
         txn = blockchainSetup.registerDonor(request.form.get("eth_address"))
@@ -70,14 +69,17 @@ def registerDonor():
         print(ex)
         print(type(ex))
         return jsonify(
-            {"error": str(ex)}
+            {
+                "code":400,
+                "message": str(ex)
+            }
             # {"error": str(ex.args[0]['message'])}
         )
 
     print(donor_id)
     # dic = {"donor_id": str(donor_id.inserted_id)}
     # return jsonify(dic)
-    return jsonify(200)
+    return jsonify({"code":200})
 
 
 @app.route("/approveDonor", methods=['POST'])
@@ -106,10 +108,8 @@ def approveDonor():
 @app.route("/registerOrganization", methods=['POST'])
 def registerOrganization():
 
-    charity = request.form.get("charityAddress")
-
+    charity = request.form.get("eth_address")
     try:
-
         txn = blockchainSetup.registerOrganization(charity)
         new_charity = {
             "username": request.form.get("username"),
@@ -130,13 +130,14 @@ def registerOrganization():
         print(ex)
         print(type(ex))
         return jsonify(
-            {"error": str(ex)}
+            {"code": 400,
+            "error": str(ex)}
             # {"error": str(ex.args[0]['message'])}
         )
 
     # dic = {"charity_id": str(charity_id.inserted_id)}
     # return jsonify(dic)
-    return jsonify(200)
+    return jsonify({"code":200})
 
 
 @app.route("/approveOrganization", methods=['POST'])
