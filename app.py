@@ -299,28 +299,82 @@ def registerProject():
     beneficiaryListId = request.args.get('beneficiaryListId')
     documentationId = request.args.get('documentationId')
     beneficiaryGainedRatio = request.args.get('beneficiaryGainedRatio')
-    
-    txn = blockchainSetup.registerProject(charity, beneficiaryListId, documentationId, beneficiaryGainedRatio)
-    dic = {"txn": txn}
-    return jsonify(dic)
+    try:
+        txn = blockchainSetup.registerProject(charity, beneficiaryListId, documentationId, beneficiaryGainedRatio)
 
+        new_beneficiary_list = {
+            "project_name": request.form.get('project_name'),
+            "beneficiaryList": request.form.get('beneficiaryList')
+        }
+        beneficiary_list_id = db.beneficiaryList.insert_one(new_beneficiary_list)
+
+        new_documentation = {
+            "project_name": request.form.get('project_name'),
+            'documentation': request.form.get('documentation')
+        }
+        documentation_id = db.documentation.insert_one(new_documentation)
+
+        new_project = {
+            "project_name": request.form.get('project_name'),
+            "beneficiaryListId": beneficiary_list_id,
+            "documentation": documentation_id,
+            "description": request.form.get("description"),
+            "registration_hash": txn,
+            "approval_hash": '',
+            "reject_hash": ''
+        }
+        project_id = db.projects.insert_one(new_project)
+    except Exception as ex:
+        print(ex)
+        print(type(ex))
+        return jsonify(
+            {"error": str(ex)}
+            # {"error": str(ex.args[0]['message'])}
+        )
+
+    return jsonify(200)
 
 @app.route("/approveProject", methods=['POST'])
 def approveProject():
+    projects = db.projects 
+
     project = request.args.get('projectId')
     inspector = request.args.get('inspectorAddress')
-    txn = blockchainSetup.approveProject(inspector, project)
-    dic = {"txn": txn}
-    return jsonify(dic)
-
+    project_name = request.args.get('project_name')
+    try:
+        txn = blockchainSetup.approveProject(inspector, project)
+        result = projects.find_one_and_update(
+            {"project_name": project_name},
+            {"$set":{
+                "approval_hash":txn
+            }
+            }
+        )
+        dic = {"txn": txn}
+        return jsonify(200)
+    except Exception as ex:
+        return jsonify({"error":str(ex)})
 
 @app.route("/rejectProject", methods=['POST'])
 def rejectProject():
+    projects = db.projects
+
     project = request.args.get('projectId')
     inspector = request.args.get('inspectorAddress')
-    txn = blockchainSetup.rejectProject(inspector, project)
-    dic = {"txn": txn}
-    return jsonify(dic)
+    project_name = request.args.get('project_name')
+    try:
+        txn = blockchainSetup.rejectProject(inspector, project)
+        result = projects.find_one_and_update(
+            {"project_name": project_name},
+            {"$set":{
+                "reject_hash":txn
+            }
+            }
+        )
+        return jsonify(200)
+    except Exception as ex:
+        return jsonify({"error":str(ex)})
+
 
 @app.route("/donor/login", methods=['GET'])
 def loginDonor():
