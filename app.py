@@ -154,7 +154,7 @@ def getAllDonors():
             print(result)
             dic[str(i)]=result
             i+=1
-        dic["total"]=i
+        dic["message"]=i
         return jsonify(dic)
         
     except Exception as ex:
