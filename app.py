@@ -134,26 +134,34 @@ def getDonorDetails():
         txn = blockchainSetup.getDonorDetails(donor)
         db_result = db.donors.find_one({"eth_address":donor})
         db_result['_id'] = str(db_result['_id'])
+        dic = {"code": 200, "result":db_result}
         return jsonify(db_result)
         
     except Exception as ex:
-        return jsonify({"error":str(ex)})
+        return jsonify({
+                "code":400,
+                "message": str(ex)
+            })
 
 @app.route("/getAllDonors", methods=['GET'])
 def getAllDonors():
     try: 
         db_result = db.donors.find()
-        dic = {}
+        dic = {"code":200}
         i = 0
         for result in db_result:
             result['_id'] = str(result['_id'])
-            print(result) 
-            dic[i] = result
+            print(result)
+            dic[str(i)]=result
             i+=1
+        dic["total"]=i
         return jsonify(dic)
         
     except Exception as ex:
-        return jsonify({"error":str(ex)})
+        return jsonify({
+                "code":400,
+                "message": str(ex)
+            })
 
 
 @app.route("/registerOrganization", methods=['POST'])
