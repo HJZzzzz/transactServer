@@ -5,6 +5,8 @@ from bson.objectid import ObjectId
 import blockchainSetup
 from blockchainSetup import  web3
 from pymongo.errors import ConnectionFailure
+from bson.json_util import dumps
+from bson.json_util import loads
 
 app = Flask(__name__)
 title = "TransACT Server"
@@ -131,8 +133,8 @@ def getDonorDetails():
     try: 
         txn = blockchainSetup.getDonorDetails(donor)
         db_result = db.donations.find({"eth_address":donor})
-        dic = {"txn": txn, "db_result": db_result}
-        return jsonify(dic)
+        dic = {"txn": txn}
+        return loads(dumps(db_result))
         
     except Exception as ex:
         return jsonify({"error":str(ex)})
@@ -140,7 +142,7 @@ def getDonorDetails():
 @app.route("/getAllDonors", methods=['GET'])
 def getAllDonors():
     try: 
-        db_result = db.donations.find_one()
+        db_result = db.donations.find()
         dic = {"db_result": db_result}
         return jsonify(dic)
         
