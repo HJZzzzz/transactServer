@@ -18,6 +18,7 @@ contract Donation is ERC721 {
     mapping(uint256 => Donation) public donations;
 
     event madeDonation(address donor, address charityOrg, uint amount);
+    event DonationConfirmed(uint donationId);
 
     struct Donation {
         uint id;
@@ -31,21 +32,24 @@ contract Donation is ERC721 {
     uint256 numDonations = 0;
 
     //to transfer to projectIdOwner
-    function makeDonation(address _charityOrgAddress, uint _amount, uint256 _projectId) public {
+    function makeDonation(uint _amount, uint256 _projectId) public {
         uint256 _donationId = numDonations++;
         // Check that the donor did not already exist:
         require(registrationContract.approvedDonor(msg.sender), 'Only approved donor can make registration.');
+        address _charityAdd = projectContract.getOrganizationAddByProjectId(_projectId);
+        require(registrationContract.approvedOrganization(_charityAdd));
+        require( uint(projectContract.checkProjectStatus(_projectId)) == 1 , 'Can only make donation to approved project.');
         // Donation storage donation = donations[_donationId];
         // super._mint(msg.sender,_donationId);
         donations[_donationId] = Donation({
             id:_donationId,
             amount: _amount,
             from: msg.sender,
-            to: _charityOrgAddress,
+            to: _charityAdd,
             confirmed: false
         });
-        emit madeDonation(msg.sender, _charityOrgAddress, _amount);
-        projectContract.distributeDonation( _amount,  _projectId);
+        emit madeDonation(msg.sender, _charityAdd, _amount);
+        projectContract.distributeDonation( _amount, _projectId);
     }
 
     function confirmReceiveMoney(uint256 _donationId) public {
@@ -62,7 +66,7 @@ contract Donation is ERC721 {
     
     function confirmedDonation(uint256 _donationId) public view returns (bool){
         return donations[_donationId].confirmed;
-    
+        emit DonationConfirmed(_donationId);
     }
 
     function viewDonation(uint256 _donationId) public view returns (uint, string memory, string memory){

@@ -38,6 +38,9 @@ contract Project {
     uint256 numProjects; 
     uint256 numChecks; 
     
+    event ApprovalProject(address inspector, uint256 projectId);
+    event RejectProject(address inspector, uint256 projectId);
+
     function registerProject(address organizationAdd, uint256 beneficiaryListId, uint256 documentationId, uint256 beneficiaryGainedRatio) public payable returns (uint256){
         require(registrationContract.approvedOrganization(msg.sender), 'Only approved organisation can create project.');
         uint256 numberOfInspectors = registrationContract.getNumOfInspectors();
@@ -79,6 +82,7 @@ contract Project {
         uint256 checkId = projectCheckingDetails[projectId];
         checkingList[checkId].state = projectState.approved;
         // checkingList[checkId].reason = approveReason;
+        emit ApprovalProject(msg.sender, projectId);
     }
     
     function rejectProject(uint256 projectId) public onlyAppointedInspector(projectId) {
@@ -92,6 +96,7 @@ contract Project {
         uint256 checkId = projectCheckingDetails[projectId];
         checkingList[checkId].state = projectState.rejected;
         // checkingList[checkId].reason = rejectReason;
+        emit RejectProject(msg.sender, projectId)
     }
     
     function checkProjectStatus(uint256 projectId) public view returns (projectState){

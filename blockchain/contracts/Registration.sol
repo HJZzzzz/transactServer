@@ -38,6 +38,8 @@ contract Registration {
 
   event rejectedDonor(uint256 id, string name);
   event deletedDonor(uint256 id, string name);
+  event DonorApproval(address donor, address inspector);
+  event OrganizationApproval(address organization, address inspector);
 
   modifier onlyOwner() {
       require(msg.sender == owner);
@@ -58,6 +60,7 @@ contract Registration {
     uint256 _inspectorId = numInspectors++;
     Inspector storage inspector = inspectors[_inspectorAddress];
     inspectorList[_inspectorId] = inspector;
+    inspectorAddress[_inspectorId] = _inspectorAddress; 
     
     // Check that the inspector did not already exist:
     require(!inspector.set, 'You cannot add existing inspector.');
@@ -83,6 +86,7 @@ contract Registration {
 
   function approveDonor(address _donorAddress) public onlyInspector{
     donors[_donorAddress].set = true;
+    emit DonorApproval(_donorAddress,msg.sender);
   }
 
   function rejectDonor(address _donorAddress) public onlyInspector{
@@ -139,6 +143,7 @@ contract Registration {
 
   function approveOrganization(address _organizationAddress) public onlyInspector{
     organizations[_organizationAddress].set = true;
+    emit OrganizationApproval(_organizationAddress, msg.sender);
   }
 
   function rejectOrganization(address _organizationAddress) public onlyInspector{
@@ -169,10 +174,23 @@ contract Registration {
   }
   
   function getNumOfInspectors() public view returns(uint256){
-      return numInspectors;
+    return numInspectors;
   }
   
   function getInspectorAddressById(uint256 inspectorId) public view returns(address){
-      return inspectorAddress[inspectorId];
+    return inspectorAddress[inspectorId];
   }
+
+  function getOrganizationIdByAddress(address organizationAddress) public view returns(uint256){
+    return organizations[organizationAddress].id; 
+  }
+
+  function getOwner() public view returns(address){
+    return owner;
+  }
+
+  function getInspectorAddress(uint256 inspectorId) public view returns(address){
+    return inspectorAddress[inspectorId]; 
+  }
+
 }

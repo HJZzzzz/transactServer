@@ -169,9 +169,7 @@ contract(Registration, accounts => {
      });
 
      it("Platform inspector should approve project1", async() => {
-      let inspectorId = project.getInspectorIdByProjectId;
-      let inspectorAddress = registration.getInspectorAddressById(inspectorId);
-      await project.approveProject(0, {from: inspectorAddress});
+      await project.approveProject(0, {from: inspector1});
       let result = await project.checkProjectStatus(0);
       assert.strictEqual(
           result.toNumber(),
