@@ -481,12 +481,18 @@ def loginCharity():
                  }
             )
         else:
-            return jsonify({"error": "username or password not correct"})
+            return jsonify({
+                "code": 400,
+                "message": "username or password not correct"
+                })
     except Exception as ex:
         print(ex)
         print(type(ex))
         return jsonify(
-            {"error": "username or password not correct"}
+            {   
+                "code": 400,
+                "message": "username or password not correct"
+            }
         )
 
 
@@ -495,7 +501,7 @@ def loginAdmin():
     if request.args.get("password") == "admin" and request.args.get("username") == "admin":
         return jsonify({"code": 200})
     else:
-        return jsonify({"code": 400, "error": "Username and Password are not matched!"})
+        return jsonify({"code": 400, "message": "Username and Password are not matched!"})
 
 
 if __name__ == "__main__":
