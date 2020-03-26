@@ -69,7 +69,9 @@ def registerDonor():
 
     donor_id = ''
     try:
-        txn = blockchainSetup.registerDonor(request.form.get("eth_address"))
+        address = request.form.get("eth_address")
+
+        txn = blockchainSetup.registerDonor(address, request.form.get("full_name"))
         new_donor = {
             "username": request.form.get("username"),
             "password": request.form.get("password"),
@@ -120,6 +122,14 @@ def approveDonor():
         return jsonify(200)
     except Exception as ex:
         return jsonify({"error":str(ex)})
+
+@app.route("/getDonorDetails", methods=['GET'])
+def getDonorDetails():
+    donor = request.args.get("donorAddress")
+    print(donor)
+    txn = blockchainSetup.getDonorDetails(donor)
+    dic = {"txn": txn}
+    return jsonify(dic)
 
 
 @app.route("/registerOrganization", methods=['POST'])

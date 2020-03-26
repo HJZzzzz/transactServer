@@ -201,12 +201,4 @@ contract(Registration, accounts => {
       
      });
 
-     //burn
-
-     //distribute
-
-     //reject project
-
-
-
 });

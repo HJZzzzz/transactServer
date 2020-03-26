@@ -87,14 +87,10 @@ event OrganizationApproval(address organization, address inspector);
     emit DonorApproval(_donorAddress,msg.sender);
   }
 
+  //reject and suspend donor
   function rejectDonor(address _donorAddress) public onlyInspector{
     donors[_donorAddress].set = false;
-    //should we delete account?
   }
-
-  // function suspendDonor(address _donorAddress) public onlyInspector{
-  //   donors[_donorAddress].set = false;
-  // }
 
   function updateDonor(address _donorAddress, string memory _donorName) public{
     // Check that the donor did not already exist:
@@ -109,9 +105,14 @@ event OrganizationApproval(address organization, address inspector);
     require(donor.set, 'You cannot delete non-existing donor.');
     delete donors[_donorAddress];
   }
-
+  
   function approvedDonor(address _donorAddress) public view returns (bool){
     return donors[_donorAddress].set;
+    
+  }
+
+  function getDonorDetails(address _donorAddress) public view returns (uint256, string memory, bool){
+    return (donors[_donorAddress].id, donors[_donorAddress].name, donors[_donorAddress].set);
     
   }
 
