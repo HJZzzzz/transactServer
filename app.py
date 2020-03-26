@@ -272,6 +272,22 @@ def deleteOrganization():
     except Exception as ex:
         return jsonify({"error":str(ex)})
 
+@app.route("/getAllPendingOrganizations", methods=['GET'])
+def getAllPendingOrganizations():
+
+    charities = db.charities
+
+    try:
+        result = charities.find(
+            {"approval_hash": ''}
+        )
+
+        return jsonify(result)
+
+    except Exception as ex:
+        return jsonify({"error":str(ex)})
+
+
 
 @app.route("/approvedOrganization", methods=['GET'])
 def approvedOrganization():
