@@ -1,7 +1,7 @@
 const Registration = artifacts.require("Registration");
 const Project = artifacts.require("Project");
 const Donation = artifacts.require("Donation");
-const MyERC721 = artifacts.require("MyERC721");
+const ERC721 = artifacts.require("ERC721");
 
 contract(Registration, accounts => {
 
@@ -17,7 +17,7 @@ contract(Registration, accounts => {
     registration = await Registration.deployed({from:networkOwner});
     project= await Project.new(registration.address, {from:networkOwner});
     donation = await Donation.new(registration.address, project.address, {from:networkOwner});
-    erc = await MyERC721.deployed({from:networkOwner});
+    erc = await ERC721.deployed({from:networkOwner});
     });
 
     it("Should deploy contract and create inspector 1", async() => {

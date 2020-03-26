@@ -66,6 +66,6 @@ contract Donation is ERC721 {
     
     function confirmedDonation(uint256 _donationId) public view returns (bool){
         return donations[_donationId].confirmed;
-        emit DonationConfirmed(_donationId);
+        // emit DonationConfirmed(_donationId);
     }
 }

@@ -96,7 +96,7 @@ contract Project {
         uint256 checkId = projectCheckingDetails[projectId];
         checkingList[checkId].state = projectState.rejected;
         // checkingList[checkId].reason = rejectReason;
-        emit RejectProject(msg.sender, projectId)
+        emit RejectProject(msg.sender, projectId);
     }
     
     function checkProjectStatus(uint256 projectId) public view returns (projectState){

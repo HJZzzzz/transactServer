@@ -1,6 +1,7 @@
 const Registration = artifacts.require("Registration");
 const Project = artifacts.require("Project");
 const Donation = artifacts.require("Donation");
+const ERC721 = artifacts.require("ERC721");
 
 
 let registration;
@@ -17,9 +18,9 @@ module.exports = function(deployer) {
         return deployer.deploy(Donation, projectInstance.address, registration);
     })).then(donationInstance => {
         console.log("Donation contract at address" + donationInstance.address);
-        // return deployer.deploy(MyERC721);
+        return deployer.deploy(ERC721);
     })
-    // .then(erc=>{
-    //     console.log("MyERC721 contract at address" + erc.address);
-    // })
+    .then(erc=>{
+        console.log("ERC721 contract at address" + erc.address);
+    })
   };
