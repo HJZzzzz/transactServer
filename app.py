@@ -66,7 +66,6 @@ def registerInspector():
 
 @app.route("/registerDonor", methods=['POST'])
 def registerDonor():
-
     donor_id = ''
     try:
         address = request.form.get("eth_address")
@@ -91,14 +90,17 @@ def registerDonor():
         print(ex)
         print(type(ex))
         return jsonify(
-            {"error": str(ex)}
+            {
+                "code":400,
+                "message": str(ex)
+            }
             # {"error": str(ex.args[0]['message'])}
         )
 
     print(donor_id)
     # dic = {"donor_id": str(donor_id.inserted_id)}
     # return jsonify(dic)
-    return jsonify(200)
+    return jsonify({"code":200})
 
 
 @app.route("/approveDonor", methods=['POST'])
@@ -157,8 +159,7 @@ def getAllDonors():
 @app.route("/registerOrganization", methods=['POST'])
 def registerOrganization():
 
-    charity = request.form.get("charityAddress")
-
+    charity = request.form.get("eth_address")
     try:
 
         txn = blockchainSetup.registerOrganization(charity, request.form.get("full_name"))
@@ -181,13 +182,14 @@ def registerOrganization():
         print(ex)
         print(type(ex))
         return jsonify(
-            {"error": str(ex)}
+            {"code": 400,
+            "error": str(ex)}
             # {"error": str(ex.args[0]['message'])}
         )
 
     # dic = {"charity_id": str(charity_id.inserted_id)}
     # return jsonify(dic)
-    return jsonify(200)
+    return jsonify({"code":200})
 
 
 @app.route("/approveOrganization", methods=['POST'])
