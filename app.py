@@ -127,16 +127,25 @@ def approveDonor():
 def getDonorDetails():
     donor = request.args.get("donorAddress")
     print(donor)
-    txn = blockchainSetup.getDonorDetails(donor)
-    db_result = db.donations.find({"eth_address":donor})
-    dic = {"txn": txn, "db_result": db_result}
-    return jsonify(dic)
+
+    try: 
+        txn = blockchainSetup.getDonorDetails(donor)
+        db_result = db.donations.find({"eth_address":donor})
+        dic = {"txn": txn, "db_result": db_result}
+        return jsonify(dic)
+        
+    except Exception as ex:
+        return jsonify({"error":str(ex)})
 
 @app.route("/getAllDonors", methods=['GET'])
 def getAllDonors():
-    db_result = db.donations.find_one()
-    dic = {"db_result": db_result}
-    return jsonify(dic)
+    try: 
+        db_result = db.donations.find_one()
+        dic = {"db_result": db_result}
+        return jsonify(dic)
+        
+    except Exception as ex:
+        return jsonify({"error":str(ex)})
 
 
 @app.route("/registerOrganization", methods=['POST'])
