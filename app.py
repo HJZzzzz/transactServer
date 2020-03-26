@@ -128,7 +128,14 @@ def getDonorDetails():
     donor = request.args.get("donorAddress")
     print(donor)
     txn = blockchainSetup.getDonorDetails(donor)
-    dic = {"txn": txn}
+    db_result = db.donations.find({"eth_address":donor})
+    dic = {"txn": txn, "db_result": db_result}
+    return jsonify(dic)
+
+@app.route("/getAllDonors", methods=['GET'])
+def getAllDonors():
+    db_result = db.donations.find_one()
+    dic = {"db_result": db_result}
     return jsonify(dic)
 
 
