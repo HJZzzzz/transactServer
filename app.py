@@ -25,7 +25,6 @@ def testGet():
 
 @app.route("/makeDonation", methods=['POST'])
 def donate():
-
     try:
         charity = request.args.get("charityAddress")
         amount = request.args.get("amount")
@@ -493,16 +492,10 @@ def loginCharity():
 
 @app.route("/admin/login", methods=['GET'])
 def loginAdmin():
-    if(
-        request.args.get("password") == "admin"
-        and
-        request.args.get("username") == "admin"
-    ):
-        return jsonify(200)
-
-    return jsonify(
-            {"error": "username or password not correct"}
-        )
+    if request.args.get("password") == "admin" and request.args.get("username") == "admin":
+        return jsonify({"code": 200})
+    else:
+        return jsonify({"code": 400, "error": "Username and Password are not matched!"})
 
 
 if __name__ == "__main__":
