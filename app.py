@@ -134,7 +134,7 @@ def getDonorDetails():
         txn = blockchainSetup.getDonorDetails(donor)
         db_result = db.donors.find_one({"eth_address":donor})
         db_result['_id'] = str(db_result['_id'])
-        dic = {"code": 200, "result":db_result}
+        dic = {"code": 200, "message":db_result}
         return jsonify(db_result)
         
     except Exception as ex:
