@@ -171,9 +171,11 @@ def getDonorsByProject():
         dic = {"code":200}
         i = 0
         for result in db_result:
-            result['_id'] = str(result['_id'])
-            print(result)
-            dic[str(i)]=result
+            donor = result['donor_address']
+            donor_details = db.donors.find_one({"eth_address":donor})
+            donor_details['_id'] = str(donor_details['_id'])
+            print(donor_details)
+            dic[str(i)]=donor_details
             i+=1
         dic["message"]=i
         return jsonify(dic)
@@ -379,24 +381,26 @@ def registerProject():
     documentationId = request.args.get('documentationId')
     beneficiaryGainedRatio = request.args.get('beneficiaryGainedRatio')
     try:
-        txn = blockchainSetup.registerProject(charity, beneficiaryListId, documentationId, beneficiaryGainedRatio)
+        txn = blockchainSetup.registerProject(charity, int(beneficiaryListId), int(documentationId), int(beneficiaryGainedRatio))
 
-        new_beneficiary_list = {
-            "project_name": request.form.get('project_name'),
-            "beneficiaryList": request.form.get('beneficiaryList')
-        }
-        beneficiary_list_id = db.beneficiaryList.insert_one(new_beneficiary_list)
+        # new_beneficiary_list = {
+        #     "project_name": request.form.get('project_name'),
+        #     "beneficiaryList": request.form.get('beneficiaryList')
+        # }
+        # beneficiary_list_id = db.beneficiaryList.insert_one(new_beneficiary_list)
 
-        new_documentation = {
-            "project_name": request.form.get('project_name'),
-            'documentation': request.form.get('documentation')
-        }
-        documentation_id = db.documentation.insert_one(new_documentation)
+        # new_documentation = {
+        #     "project_name": request.form.get('project_name'),
+        #     'documentation': request.form.get('documentation')
+        # }
+        # documentation_id = db.documentation.insert_one(new_documentation)
 
         new_project = {
             "project_name": request.form.get('project_name'),
-            "beneficiaryListId": beneficiary_list_id,
-            "documentation": documentation_id,
+            # "beneficiaryListId": beneficiary_list_id,
+            # "documentation": documentation_id,
+            "beneficiaryListId": beneficiaryListId,
+            "documentation": documentationId,
             "description": request.form.get("description"),
             "registration_hash": txn,
             "approval_hash": '',
@@ -421,7 +425,7 @@ def approveProject():
     inspector = request.args.get('inspectorAddress')
     project_name = request.args.get('project_name')
     try:
-        txn = blockchainSetup.approveProject(inspector, project)
+        txn = blockchainSetup.approveProject(inspector, int(project))
         result = projects.find_one_and_update(
             {"project_name": project_name},
             {"$set":{
