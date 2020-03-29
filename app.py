@@ -163,6 +163,28 @@ def getAllDonors():
                 "message": str(ex)
             })
 
+@app.route("/getDonorsByProject", methods=['GET'])
+def getAllDonors():
+    projectId = request.args.get("projectId")
+    print(projectId)
+    try: 
+        db_result = db.donors.find({"project_id":projectId})
+        dic = {"code":200}
+        i = 0
+        for result in db_result:
+            result['_id'] = str(result['_id'])
+            print(result)
+            dic[str(i)]=result
+            i+=1
+        dic["message"]=i
+        return jsonify(dic)
+        
+    except Exception as ex:
+        return jsonify({
+                "code":400,
+                "message": str(ex)
+            })
+
 
 @app.route("/registerOrganization", methods=['POST'])
 def registerOrganization():
