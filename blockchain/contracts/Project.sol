@@ -40,7 +40,8 @@ contract Project {
     
     event ApprovalProject(address inspector, uint256 projectId);
     event RejectProject(address inspector, uint256 projectId);
-
+    event RegisterProject(address organizationAdd, uint256 projectId);
+    event DistributeDonation(uint256 donationAmount, uint256 projectId);
     function registerProject(address organizationAdd, uint256 beneficiaryListId, uint256 documentationId, uint256 beneficiaryGainedRatio) public payable returns (uint256){
         require(registrationContract.approvedOrganization(msg.sender), 'Only approved organisation can create project.');
         uint256 numberOfInspectors = registrationContract.getNumOfInspectors();
@@ -68,6 +69,7 @@ contract Project {
         checkingList[newCheckId] = newCheck; 
         projectCheckingDetails[newProjectId] = newCheckId;
         
+        emit RegisterProject(organizationAdd, newProjectId);
         return newProjectId; 
     }
     
@@ -115,6 +117,8 @@ contract Project {
         projectList[projectId].numOfDonationReceived = projectList[projectId].numOfDonationReceived + 1;
         projectList[projectId].amountOfDonationReceived += donationAmount;
         projectList[projectId].amountOfDonationBeneficiaryReceived += donationAmount * projectList[projectId].beneficiaryGainedRatio;
+
+        emit DistributeDonation(donationAmount, projectId);
     }
     
     modifier onlyAppointedInspector(uint256 projectId) {
