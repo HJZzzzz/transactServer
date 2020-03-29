@@ -164,11 +164,11 @@ def getAllDonors():
             })
 
 @app.route("/getDonorsByProject", methods=['GET'])
-def getAllDonors():
+def getDonorsByProject():
     projectId = request.args.get("projectId")
     print(projectId)
     try: 
-        db_result = db.donors.find({"project_id":projectId})
+        db_result = db.donations.find({"project_id":projectId})
         dic = {"code":200}
         i = 0
         for result in db_result:
