@@ -25,7 +25,6 @@ def testGet():
 
 @app.route("/makeDonation", methods=['POST'])
 def donate():
-
     try:
         charity = request.args.get("charityAddress")
         amount = request.args.get("amount")
@@ -504,27 +503,27 @@ def loginCharity():
                  }
             )
         else:
-            return jsonify({"error": "username or password not correct"})
+            return jsonify({
+                "code": 400,
+                "message": "username or password not correct"
+                })
     except Exception as ex:
         print(ex)
         print(type(ex))
         return jsonify(
-            {"error": "username or password not correct"}
+            {   
+                "code": 400,
+                "message": "username or password not correct"
+            }
         )
 
 
 @app.route("/admin/login", methods=['GET'])
 def loginAdmin():
-    if(
-        request.args.get("password") == "admin"
-        and
-        request.args.get("username") == "admin"
-    ):
-        return jsonify(200)
-
-    return jsonify(
-            {"error": "username or password not correct"}
-        )
+    if request.args.get("password") == "admin" and request.args.get("username") == "admin":
+        return jsonify({"code": 200})
+    else:
+        return jsonify({"code": 400, "message": "Username and Password are not matched!"})
 
 
 if __name__ == "__main__":
