@@ -5,6 +5,7 @@ from bson.objectid import ObjectId
 import blockchainSetup
 from blockchainSetup import  web3
 from pymongo.errors import ConnectionFailure
+from bson.json_util import dumps
 
 app = Flask(__name__)
 title = "TransACT Server"
@@ -350,6 +351,21 @@ def confirmReceiveMoney():
         return jsonify({"error":str(ex)})
 
 
+
+@app.route("/retrieveProjectDetails",methods=['GET'])
+def retrieveProjectDetails():
+
+    try:
+        result = db.projects.find_one({"_id":ObjectId(request.args.get("id"))})
+        result['_id'] = str(result['_id'])
+        result['charity_id'] = str(result['charity_id'])
+        charity = db.charities.find_one({"_id":ObjectId(result['charity_id'])})
+        result['charity_name'] = charity['name']
+        return jsonify(result)
+
+    except Exception as ex:
+        return jsonify({"error":str(ex)})
+
 @app.route("/registerProject", methods=['POST'])
 def registerProject():
     charity = request.args.get("charityAddress")
@@ -432,6 +448,25 @@ def rejectProject():
     except Exception as ex:
         return jsonify({"error":str(ex)})
 
+@app.route("/retrieveAllProjects", methods=['GET'])
+def retrieveAllProjects():
+
+    projects = db.projects
+
+    try:
+        result = list(projects.find({"approval_hash": { "$ne": ""}}))
+        print(result)
+        print(type(result))
+        for i in result:
+            i['_id'] = str(i['_id'])
+            i['charity_id'] = str(i['charity_id'])
+            print(i)
+
+        return jsonify(result)
+    except Exception as ex:
+        return jsonify({"error":str(ex)})
+
+
 
 @app.route("/donor/login", methods=['GET'])
 def loginDonor():
@@ -502,6 +537,47 @@ def loginAdmin():
         return jsonify({"code": 200})
     else:
         return jsonify({"code": 400, "message": "Username and Password are not matched!"})
+
+
+
+@app.route("/adddummydata",methods=['GET'])
+def dummyData():
+
+    i = 0;
+    for i in range(3):
+        # txn = blockchainSetup.registerOrganization(charity, request.form.get("full_name"))
+        new_charity = {
+            "username": "charity"+str(i),
+            "password": "password"+str(i),
+            "email":  "email"+str(i),
+            "eth_address": "testing",
+            "bank_account": "testing",
+            "physical_address": "testing",
+            "name": "charity name"+str(i),
+            "contact_number": "123456",
+            "financial_info": "213123",
+            "description": "good charity balahbalahbalah",
+            "registration_hash": "yeah",
+            "approval_hash": "oh"
+        }
+        p = 0;
+        charity_id = db.charities.insert_one(new_charity)
+        for p in range(3):
+            new_project = {
+                "charity_id": charity_id.inserted_id,
+                "project_name": "project_name"+str(i)+str(p),
+                "beneficiaryListId": "beneficiary_list_id"+str(i)+str(p),
+                "documentation": "documentation"+str(i)+str(p),
+                "expiry_date": "2020-05-20",
+                "target_amount": 10000,
+                "description": "A good charity Project balah balah balah balah balah balah balah balah",
+                "registration_hash": "yeah",
+                "approval_hash": 'yes',
+                "reject_hash": 'oh'
+            }
+            project_id = db.projects.insert_one(new_project)
+
+    return jsonify({"code":200})
 
 
 if __name__ == "__main__":
