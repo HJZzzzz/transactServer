@@ -469,47 +469,47 @@ def loginDonor():
         if ( len(results) and results["password"] == request.args.get("password")):
             print(results["approval_hash"])
             print("::")
-            approval = blockchainSetup.checkDonorApproval(results["approval_hash"])
+            approval = blockchainSetup.checkApproval(results["approval_hash"])
             print(approval)
             print(":")
             if(approval):
                 return jsonify(
-                    {"id": str(results["_id"]),
-                     "username": results["username"],
-                     "eth_address": results["eth_address"]
+                    {   "code": 200,
+                        "_id": str(results["_id"]),
+                        "username": results["username"],
+                        "eth_address": results["eth_address"]
                      }
                 )
             else:
-                return jsonify({"error": "Your account is still waiting for approval!"})
-
+                return jsonify({"code": 400, "error": "Your account is still waiting for approval!"})
         else:
-            return jsonify({"error": "username or password not correct"})
+            return jsonify({"code":400, "error": "Username and Password are not matched!"})
 
     except Exception as ex:
-        # print(ex)
-        # print(type(ex))
-        return jsonify(
-            {"error": "username or password not correct"}
-        )
+        return jsonify({"code":400, "error": "Login Failed"})
 
 
 @app.route("/charity/login", methods=['GET'])
 def loginCharity():
-    charites = db.donors
+    charites = db.charites
     try:
         results = charites.find_one({"username": request.args.get("username")})
-        print(results)
         if ( len(results) and results["password"] == request.args.get("password")):
-            return jsonify(
-                {"id": str(results["_id"]),
-                 "username": results["username"],
-                 "eth_address": results["eth_address"]
-                 }
-            )
+            approval = blockchainSetup.checkApproval(results["approval_hash"])
+            if approval:
+                return jsonify(
+                    {   "code": 200,
+                        "_id": str(results["_id"]),
+                        "username": results["username"],
+                        "eth_address": results["eth_address"]
+                    }
+                )
+            else:
+                return jsonify({"code": 400, "error": "Your account is still waiting for approval!"})
         else:
             return jsonify({
                 "code": 400,
-                "message": "username or password not correct"
+                "message": "Username and Password are not matched!"
                 })
     except Exception as ex:
         print(ex)
@@ -525,7 +525,10 @@ def loginCharity():
 @app.route("/admin/login", methods=['GET'])
 def loginAdmin():
     if request.args.get("password") == "admin" and request.args.get("username") == "admin":
-        return jsonify({"code": 200})
+        return jsonify({
+            "code": 200,
+            "eth_address": blockchainSetup.inspectorAddress
+            })
     else:
         return jsonify({"code": 400, "message": "Username and Password are not matched!"})
 
