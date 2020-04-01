@@ -131,7 +131,7 @@ def approveDonor():
             })
 
 @app.route("/rejectDonor", methods=['POST'])
-def approverejectDonorDonor():
+def rejectDonor():
     donors = db.donors
 
     donor = request.form.get("donorAddress")
@@ -217,6 +217,7 @@ def getAllPendingDonors():
                 "code":400,
                 "message": str(ex)
             })
+            
 @app.route("/getDonorsByProject", methods=['GET'])
 def getDonorsByProject():
     projectId = request.args.get("projectId")
