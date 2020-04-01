@@ -7,11 +7,8 @@ contract Registration {
   mapping(address => Inspector) public inspectors;
   mapping(address => Organization) public organizations;
   mapping(uint256 => Inspector) inspectorList;
-<<<<<<< HEAD
-  mapping(uint256 => address) inspectorAddress; 
-=======
   mapping(uint256 => address) public inspectorAddress; 
->>>>>>> 47d380c2f0211452eb0588eaa50eef2c8267433c
+
 
 
   struct Donor {
