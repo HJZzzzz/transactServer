@@ -606,7 +606,6 @@ def loginCharity():
             }
         )
 
-
 @app.route("/admin/login", methods=['GET'])
 def loginAdmin():
     if request.args.get("password") == "admin" and request.args.get("username") == "admin":
