@@ -7,7 +7,11 @@ contract Registration {
   mapping(address => Inspector) public inspectors;
   mapping(address => Organization) public organizations;
   mapping(uint256 => Inspector) inspectorList;
+<<<<<<< HEAD
   mapping(uint256 => address) inspectorAddress; 
+=======
+  mapping(uint256 => address) public inspectorAddress; 
+>>>>>>> 47d380c2f0211452eb0588eaa50eef2c8267433c
 
 
   struct Donor {
@@ -33,9 +37,11 @@ contract Registration {
 
 
   uint256 numDonors = 0;
-  uint256 numInspectors = 0;
+  uint256 public numInspectors = 0;
   uint256 numOrganizations = 0;
 
+event DonorApproval(address donor, address inspector);
+event OrganizationApproval(address organization, address inspector);
 
   modifier onlyOwner() {
       require(msg.sender == owner);
@@ -56,6 +62,7 @@ contract Registration {
     uint256 _inspectorId = numInspectors++;
     Inspector storage inspector = inspectors[_inspectorAddress];
     inspectorList[_inspectorId] = inspector;
+    inspectorAddress[_inspectorId] = _inspectorAddress; 
     
     // Check that the inspector did not already exist:
     require(!inspector.set, 'You cannot add existing inspector.');
@@ -81,16 +88,13 @@ contract Registration {
 
   function approveDonor(address _donorAddress) public onlyInspector{
     donors[_donorAddress].set = true;
+    emit DonorApproval(_donorAddress,msg.sender);
   }
 
+  //reject and suspend donor
   function rejectDonor(address _donorAddress) public onlyInspector{
     donors[_donorAddress].set = false;
-    //should we delete account?
   }
-
-  // function suspendDonor(address _donorAddress) public onlyInspector{
-  //   donors[_donorAddress].set = false;
-  // }
 
   function updateDonor(address _donorAddress, string memory _donorName) public{
     // Check that the donor did not already exist:
@@ -105,9 +109,14 @@ contract Registration {
     require(donor.set, 'You cannot delete non-existing donor.');
     delete donors[_donorAddress];
   }
-
+  
   function approvedDonor(address _donorAddress) public view returns (bool){
     return donors[_donorAddress].set;
+    
+  }
+
+  function getDonorDetails(address _donorAddress) public view returns (uint256, string memory, bool){
+    return (donors[_donorAddress].id, donors[_donorAddress].name, donors[_donorAddress].set);
     
   }
 
@@ -135,6 +144,7 @@ contract Registration {
 
   function approveOrganization(address _organizationAddress) public onlyInspector{
     organizations[_organizationAddress].set = true;
+    emit OrganizationApproval(_organizationAddress, msg.sender);
   }
 
   function rejectOrganization(address _organizationAddress) public onlyInspector{
@@ -162,6 +172,26 @@ contract Registration {
   function getOrganizationName(address _organizationAddress) public view returns (string memory){
     return organizations[_organizationAddress].name;
     
+  }
+  
+  function getNumOfInspectors() public view returns(uint256){
+    return numInspectors;
+  }
+  
+  function getInspectorAddressById(uint256 inspectorId) public view returns(address){
+    return inspectorAddress[inspectorId];
+  }
+
+  function getOrganizationIdByAddress(address organizationAddress) public view returns(uint256){
+    return organizations[organizationAddress].id; 
+  }
+
+  function getOwner() public view returns(address){
+    return owner;
+  }
+
+  function getInspectorAddress(uint256 inspectorId) public view returns(address){
+    return inspectorAddress[inspectorId]; 
   }
 
 }
