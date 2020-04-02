@@ -130,7 +130,7 @@ def getDonorDetails():
     print(donor)
 
     try: 
-        txn = blockchainSetup.getDonorDetails(donor)
+        # txn = blockchainSetup.getDonorDetails(donor)
         db_result = db.donors.find_one({"eth_address":donor})
         db_result['_id'] = str(db_result['_id'])
         dic = {"code": 200, "message":db_result}
@@ -353,6 +353,24 @@ def getOrganizationName():
     txn = blockchainSetup.getOrganizationName(charity)
     dic = {"txn": txn}
     return jsonify(dic)
+
+@app.route("/getCharityDetails", methods=['GET'])
+def getCharityDetails():
+    charity = request.args.get("charityAddress")
+    print(charity)
+
+    try: 
+        # txn = blockchainSetup.getDonorDetails(donor)
+        db_result = db.charities.find_one({"eth_address":charity})
+        db_result['_id'] = str(db_result['_id'])
+        dic = {"code": 200, "message":db_result}
+        return jsonify(db_result)
+        
+    except Exception as ex:
+        return jsonify({
+                "code":400,
+                "message": str(ex)
+            })    
 
 
 @app.route("/confirmReceiveMoney", methods=['POST'])

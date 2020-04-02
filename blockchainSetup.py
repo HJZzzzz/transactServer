@@ -15,7 +15,7 @@ with open("./blockchain/build/contracts/Project.json") as project:
     info_json = json.load(project)
 abi = info_json["abi"]
 
-projectContractAddress = '0x455B070703DB6ba3395b7eEe68b8cF3467b4dC76'
+projectContractAddress = '0x04C7d832b4410dC392e9d43B91D35482b07F44e6'
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
 
@@ -23,7 +23,7 @@ with open("./blockchain/build/contracts/Registration.json") as regist:
     info_json = json.load(regist)
 abi = info_json["abi"]
 
-registrationContractAddress = '0x383Bb38f91104A5f08668337047BFeD7d8d0A74E'
+registrationContractAddress = '0x1b6d2Cdf4F15364F58B5c3973fA7A151F56a2dC2'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -31,7 +31,7 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
     info_json = json.load(donation)
 abi = info_json["abi"]
 
-donationContractAddress = '0xb0105D6491f979E61197200CB523C9e11a534209'
+donationContractAddress = '0xe57Bcf7d703FDbBc8a72FDDBf9e90aFE9b5dBA28'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
 
