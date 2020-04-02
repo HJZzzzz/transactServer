@@ -109,8 +109,7 @@ def updateDonor():
     donor = request.form.get("eth_address")
 
     try:
-        #JY: reminder to un-comment
-        # txn = blockchainSetup.updateDonor(donor, request.form.get("full_name"))
+        txn = blockchainSetup.updateDonor(donor, request.form.get("full_name"))
 
         result = donors.find_one_and_update(
             {"eth_address": donor},
@@ -271,6 +270,46 @@ def getDonorsByProject():
                 "code":400,
                 "message": str(ex)
             })
+
+@app.route("/getProjectsByOrganization", methods=['GET'])
+def getProjectsByOrganization():
+    charity = request.args.get("charityAddress")
+    print(charity)
+    try: 
+        db_result = db.projects.find({"charity_address":charity})
+        result_list = []
+        for result in db_result:
+            result['_id'] = str(result['_id'])
+            print(result)
+            result_list.append(result)
+        dic = {"code":200, "items":result_list}    
+        return jsonify(dic)
+        
+    except Exception as ex:
+        return jsonify({
+                "code":400,
+                "message": str(ex)
+            })     
+
+# @app.route("/getProjectsByDonor", methods=['GET'])
+# def getProjectsByDonor():
+#     donor = request.args.get("donorAddress")
+#     print(donor)
+#     try: 
+#         db_result = db.projects.find({"charity_address":charity})
+#         result_list = []
+#         for result in db_result:
+#             result['_id'] = str(result['_id'])
+#             print(result)
+#             result_list.append(result)
+#         dic = {"code":200, "items":result_list}    
+#         return jsonify(dic)
+        
+#     except Exception as ex:
+#         return jsonify({
+#                 "code":400,
+#                 "message": str(ex)
+#             })                         
 
 
 @app.route("/registerOrganization", methods=['POST'])
@@ -499,36 +538,37 @@ def confirmReceiveMoney():
 @app.route("/registerProject", methods=['POST'])
 def registerProject():
     charity = request.args.get("charityAddress")
-    # beneficiaryListId = request.args.get('beneficiaryListId')
-    # documentationId = request.args.get('documentationId')
+    beneficiary_list_id = request.args.get('beneficiaryListId')
+    documentation_id = request.args.get('documentationId')
     beneficiaryGainedRatio = request.args.get('beneficiaryGainedRatio')
     try:
         
 
-        new_beneficiary_list = {
-            "project_name": request.form.get('project_name'),
-            "beneficiaryList": request.form.getlist('beneficiaryList')
-        }
-        beneficiary_list_id = db.beneficiaryList.insert_one(new_beneficiary_list)
+        # new_beneficiary_list = {
+        #     "project_name": request.form.get('project_name'),
+        #     "beneficiaryList": request.form.getlist('beneficiaryList')
+        # }
+        # beneficiary_list_id = db.beneficiaryList.insert_one(new_beneficiary_list)
 
-        new_documentation = {
-            "project_name": request.form.get('project_name'),
-            'documentation': request.form.get('documentation')
-        }
-        documentation_id = db.documentation.insert_one(new_documentation)
+        # new_documentation = {
+        #     "project_name": request.form.get('project_name'),
+        #     'documentation': request.form.get('documentation')
+        # }
+        # documentation_id = db.documentation.insert_one(new_documentation)
 
-        txn = blockchainSetup.registerProject(charity, int(beneficiary_list_id), int(documentation_id), int(beneficiaryGainedRatio))
+        # txn = blockchainSetup.registerProject(charity, int(beneficiary_list_id), int(documentation_id), int(beneficiaryGainedRatio))
 
         new_project = {
             "project_name": request.form.get('project_name'),
-            "beneficiaryListId": beneficiary_list_id,
-            "documentation": documentation_id,
-            "beneficiaryListId": beneficiaryListId,
-            "documentation": documentationId,
+            "charity_address": request.form.get('charityAddress'),
+            # "beneficiaryListId": beneficiary_list_id,
+            # "documentation": documentation_id,
+            # "beneficiaryListId": beneficiaryListId,
+            # "documentation": documentationId,
             "expire_date": request.form.get('expire_date'), 
             "target_amount": request.form.get('target_amount'),
             "description": request.form.get("description"),
-            "registration_hash": txn,
+            # "registration_hash": txn,
             "approval_hash": '',
             "reject_hash": ''
         }
