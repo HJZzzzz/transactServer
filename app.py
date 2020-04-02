@@ -36,6 +36,7 @@ def donate():
             "amount": request.form.get("amount"),
             "project_id": request.form.get("project_id"),
             "donor_address": request.form.get("donor_address"),
+            "donation_time": request.form.get("donation_time"),
             "donation_hash": txn,
             "confirmed_hash": ''
         }
@@ -371,10 +372,10 @@ def retrieveProjectDetails():
             num += d['amount']
         print(num)
         result['actual_amount'] = num
-        return jsonify(result)
+        return jsonify({'code': 200, "result": result})
 
     except Exception as ex:
-        return jsonify({"error":str(ex)})
+        return jsonify({"code": 400, "message":str(ex)})
 
 @app.route("/registerProject", methods=['POST'])
 def registerProject():
@@ -477,9 +478,9 @@ def retrieveAllProjects():
             i['actual_amount'] = num
             print(i)
 
-        return jsonify(result)
+        return jsonify({"code":200, "result": result})
     except Exception as ex:
-        return jsonify({"error":str(ex)})
+        return jsonify({"code":400, "message":str(ex)})
 
 @app.route("/retrieveDonorsByProject", methods=['GET'])
 def retrieveDonorsByProject():
@@ -495,9 +496,9 @@ def retrieveDonorsByProject():
 
         latestDonors = list(reversed(list(donations)))[0:10]
 
-        return jsonify(latestDonors)
+        return jsonify({"code":200, "latestDonors": latestDonors})
     except Exception as ex:
-        return jsonify({"error":str(ex)})
+        return jsonify({"code":400, "message":str(ex)})
 
 @app.route("/donor/login", methods=['GET'])
 def loginDonor():
