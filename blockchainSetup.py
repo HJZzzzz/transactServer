@@ -11,13 +11,13 @@ from eth_typing import (
 web3 = Web3(Web3.HTTPProvider("http://localhost:8545"))
 accounts = web3.eth.accounts
 
-inspectorAddress = "0x4cA4da21B8959b17ef4fF8800bdC0f20cA024415"
+inspectorAddress = "0xC522170586aEC99742459467B6A2f13C222EA36A"
 
 with open("./blockchain/build/contracts/Project.json") as project:
     info_json = json.load(project)
 abi = info_json["abi"]
 
-projectContractAddress = '0xcD37d643E5fF46EaeB56efD069b9CbA4b58fA748'
+projectContractAddress = '0x3C7e0378f832dB9Dcc750D477cD89A3cA845F843'
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
 
@@ -25,7 +25,7 @@ with open("./blockchain/build/contracts/Registration.json") as regist:
     info_json = json.load(regist)
 abi = info_json["abi"]
 
-registrationContractAddress = '0x9d0EBE58C952555EAcB6e1cd029fBfF1D7Cd848d'
+registrationContractAddress = '0x02418eF857618608D717cC3b300Db3F2CEb9F7aA'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -33,7 +33,7 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
     info_json = json.load(donation)
 abi = info_json["abi"]
 
-donationContractAddress = '0x0554bacEb59D6c60DcBdfafc2F8c1E9311a0746b'
+donationContractAddress = '0xeF1E8Eb64446460023556E534089130fa64F59e3'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
 
