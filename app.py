@@ -101,6 +101,36 @@ def registerDonor():
     # return jsonify(dic)
     return jsonify({"code":200})
 
+@app.route("/updateDonor", methods=['POST'])
+def updateDonor():
+
+    donors = db.donors
+
+    donor = request.form.get("eth_address")
+
+    try:
+        #JY: reminder to un-comment
+        # txn = blockchainSetup.updateDonor(donor, request.form.get("full_name"))
+
+        result = donors.find_one_and_update(
+            {"eth_address": donor},
+            {"$set":{
+                "username": request.form.get("username"),
+                "password": request.form.get("password"),
+                "email": request.form.get("email"),
+                "bank_account": request.form.get("bank_account"),
+                "physical_address": request.form.get("physical_address"),
+                "full_name": request.form.get("full_name"),
+                "contact_number": request.form.get("contact_number"),
+            }
+            }
+        )
+        dic = {"code": 200}
+        return jsonify(dic)
+    except Exception as ex:
+        return jsonify({"error":str(ex)})
+
+
 
 @app.route("/approveDonor", methods=['POST'])
 def approveDonor():
@@ -344,7 +374,7 @@ def updateOrganization():
 
     charities = db.charities
 
-    charity = request.form.get("charityAddress")
+    charity = request.form.get("eth_address")
 
     try:
         txn = blockchainSetup.updateOrganization(charity, request.form.get("full_name"))
@@ -364,8 +394,8 @@ def updateOrganization():
             }
             }
         )
-        # dic = {"txn": txn}
-        return jsonify(200)
+        dic = {"code": 200}
+        return jsonify(dic)
     except Exception as ex:
         return jsonify({"error":str(ex)})
 
