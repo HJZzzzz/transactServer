@@ -71,6 +71,12 @@ def registerDonor(address, name):
     print(receipt)
     return receipt.transactionHash.hex()
 
+def updateDonor(donor, name):
+    txn = registrationContract.functions.updateDonor(donor, name).transact({'from': donor})
+    receipt = web3.eth.waitForTransactionReceipt(txn)
+    print(receipt)
+    return receipt.transactionHash.hex()    
+
 
 def approveDonor(donor,inspector):
     txn = registrationContract.functions.approveDonor(donor).transact({'from':inspector})
