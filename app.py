@@ -106,8 +106,8 @@ def registerDonor():
 def approveDonor():
     donors = db.donors
 
-    donor = request.args.get("donorAddress")
-    inspector = request.args.get("inspectorAddress")
+    donor = request.form.get("donorAddress")
+    inspector = request.form.get("inspectorAddress")
 
     try:
         txn = blockchainSetup.approveDonor(donor, inspector)
@@ -120,9 +120,42 @@ def approveDonor():
             }
         )
         # dic = {"txn": txn}
-        return jsonify(200)
+        return jsonify({
+                "code":200,
+                "message": "Approve Donor"
+            })
     except Exception as ex:
-        return jsonify({"error":str(ex)})
+        return jsonify({
+                "code":400,
+                "message": str(ex)
+            })
+
+@app.route("/rejectDonor", methods=['POST'])
+def rejectDonor():
+    donors = db.donors
+
+    donor = request.form.get("donorAddress")
+    inspector = request.form.get("inspectorAddress")
+
+    try:
+        txn = blockchainSetup.rejectDonor(donor, inspector)
+
+        result = donors.find_one_and_update(
+            {"eth_address": donor},
+            {"$set":{
+                "approval_hash":txn
+            }
+            }
+        )
+        return jsonify({
+                "code":200,
+                "message": "Reject Donor"
+            })
+    except Exception as ex:
+        return jsonify({
+                "code":400,
+                "message": str(ex)
+            })
 
 @app.route("/getDonorDetails", methods=['GET'])
 def getDonorDetails():
@@ -146,15 +179,16 @@ def getDonorDetails():
 def getAllDonors():
     try: 
         db_result = db.donors.find()
-        dic = {"code":200}
-        i = 0
+        result_list = []
         for result in db_result:
             result['_id'] = str(result['_id'])
             print(result)
-            dic[str(i)]=result
-            i+=1
-        dic["message"]=i
-        return jsonify(dic)
+            result_list.append(result)
+
+        return jsonify(
+            {"code": 200,
+            "items": result_list}
+        )
         
     except Exception as ex:
         return jsonify({
@@ -162,6 +196,28 @@ def getAllDonors():
                 "message": str(ex)
             })
 
+@app.route("/getAllPendingDonors", methods=['GET'])
+def getAllPendingDonors():
+    try:
+        db_result = db.donors
+        result_list = []
+        all_result = db_result.find(
+            {"approval_hash": ''}
+        )
+        for result in all_result:
+            result['_id'] = str(result['_id'])
+            result_list.append(result)
+
+        return jsonify(
+            {"code": 200,
+            "items": result_list}
+        )
+    except Exception as ex:
+        return jsonify({
+                "code":400,
+                "message": str(ex)
+            })
+            
 @app.route("/getDonorsByProject", methods=['GET'])
 def getDonorsByProject():
     projectId = request.args.get("projectId")
@@ -228,8 +284,8 @@ def approveOrganization():
 
     charities = db.charities
 
-    charity = request.args.get("charityAddress")
-    inspector = request.args.get("inspectorAddress")
+    charity = request.form.get("charityAddress")
+    inspector = request.form.get("inspectorAddress")
 
     try:
         txn = blockchainSetup.approveOrganization(charity, inspector)
@@ -242,9 +298,15 @@ def approveOrganization():
             }
         )
         # dic = {"txn": txn}
-        return jsonify(200)
+        return jsonify({
+                "code": 200,
+                "message": "Approve organization"
+                })
     except Exception as ex:
-        return jsonify({"error":str(ex)})
+        return jsonify({
+                "code": 400,
+                "message": str(ex)
+                })
 
 
 @app.route("/rejectOrganization", methods=['POST'])
@@ -252,8 +314,8 @@ def rejectOrganization():
 
     charities = db.charities
 
-    charity = request.args.get("charityAddress")
-    inspector = request.args.get("inspectorAddress")
+    charity = request.form.get("charityAddress")
+    inspector = request.form.get("inspectorAddress")
 
     try:
         txn = blockchainSetup.rejectOrganization(charity, inspector)
@@ -266,9 +328,15 @@ def rejectOrganization():
             }
         )
         # dic = {"txn": txn}
-        return jsonify(200)
+        return jsonify({
+                "code": 200,
+                "message": "Reject organization"
+                })
     except Exception as ex:
-        return jsonify({"error":str(ex)})
+        return jsonify({
+                "code": 400,
+                "message": str(ex)
+                })
 
 
 @app.route("/updateOrganization", methods=['POST'])
@@ -322,19 +390,25 @@ def deleteOrganization():
 
 @app.route("/getAllPendingOrganizations", methods=['GET'])
 def getAllPendingOrganizations():
-
-    charities = db.charities
-
     try:
-        result = charities.find(
+        db_result = db.charities
+        result_list = []
+        all_result = db_result.find(
             {"approval_hash": ''}
         )
+        for result in all_result:
+            result['_id'] = str(result['_id'])
+            result_list.append(result)
 
-        return jsonify(result)
-
+        return jsonify(
+            {"code": 200,
+            "items": result_list}
+        )
     except Exception as ex:
-        return jsonify({"error":str(ex)})
-
+        return jsonify({
+                "code":400,
+                "message": str(ex)
+            })
 
 
 @app.route("/approvedOrganization", methods=['GET'])
@@ -395,36 +469,47 @@ def confirmReceiveMoney():
 @app.route("/registerProject", methods=['POST'])
 def registerProject():
     charity = request.args.get("charityAddress")
-    beneficiaryListId = request.args.get('beneficiaryListId')
-    documentationId = request.args.get('documentationId')
+    # beneficiaryListId = request.args.get('beneficiaryListId')
+    # documentationId = request.args.get('documentationId')
     beneficiaryGainedRatio = request.args.get('beneficiaryGainedRatio')
     try:
-        txn = blockchainSetup.registerProject(charity, int(beneficiaryListId), int(documentationId), int(beneficiaryGainedRatio))
+        
 
-        # new_beneficiary_list = {
-        #     "project_name": request.form.get('project_name'),
-        #     "beneficiaryList": request.form.get('beneficiaryList')
-        # }
-        # beneficiary_list_id = db.beneficiaryList.insert_one(new_beneficiary_list)
+        new_beneficiary_list = {
+            "project_name": request.form.get('project_name'),
+            "beneficiaryList": request.form.getlist('beneficiaryList')
+        }
+        beneficiary_list_id = db.beneficiaryList.insert_one(new_beneficiary_list)
 
-        # new_documentation = {
-        #     "project_name": request.form.get('project_name'),
-        #     'documentation': request.form.get('documentation')
-        # }
-        # documentation_id = db.documentation.insert_one(new_documentation)
+        new_documentation = {
+            "project_name": request.form.get('project_name'),
+            'documentation': request.form.get('documentation')
+        }
+        documentation_id = db.documentation.insert_one(new_documentation)
+
+        txn = blockchainSetup.registerProject(charity, int(beneficiary_list_id), int(documentation_id), int(beneficiaryGainedRatio))
 
         new_project = {
             "project_name": request.form.get('project_name'),
-            # "beneficiaryListId": beneficiary_list_id,
-            # "documentation": documentation_id,
+            "beneficiaryListId": beneficiary_list_id,
+            "documentation": documentation_id,
             "beneficiaryListId": beneficiaryListId,
             "documentation": documentationId,
+            "expire_date": request.form.get('expire_date'), 
+            "target_amount": request.form.get('target_amount'),
             "description": request.form.get("description"),
             "registration_hash": txn,
             "approval_hash": '',
             "reject_hash": ''
         }
         project_id = db.projects.insert_one(new_project)
+
+        return jsonify({
+                "code": 200,
+                "message": "username or password not correct"
+                })
+
+        
     except Exception as ex:
         print(ex)
         print(type(ex))
@@ -539,11 +624,13 @@ def loginCharity():
             }
         )
 
-
 @app.route("/admin/login", methods=['GET'])
 def loginAdmin():
     if request.args.get("password") == "admin" and request.args.get("username") == "admin":
-        return jsonify({"code": 200})
+        return jsonify({
+            "code": 200,
+            "eth_address": blockchainSetup.inspectorAddress
+            })
     else:
         return jsonify({"code": 400, "message": "Username and Password are not matched!"})
 

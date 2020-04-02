@@ -11,6 +11,8 @@ from eth_typing import (
 web3 = Web3(Web3.HTTPProvider("http://localhost:8545"))
 accounts = web3.eth.accounts
 
+inspectorAddress = "0xcEE315c0faf79aB5cF5485bDFd83eF7461a3b235"
+
 with open("./blockchain/build/contracts/Project.json") as project:
     info_json = json.load(project)
 abi = info_json["abi"]
@@ -41,7 +43,6 @@ def make_donation(charity, amount, pid, donor):
     receipt = web3.eth.waitForTransactionReceipt(txn)
     print(receipt)
     return receipt.transactionHash.hex()
-
 
 
 def registerInspector(address):
@@ -77,6 +78,11 @@ def approveDonor(donor,inspector):
     print(receipt)
     return receipt.transactionHash.hex()
 
+def rejectDonor(donor, inspector): 
+    txn = registrationContract.functions.rejectDonor(donor).transact({'from': inspector})
+    receipt = web3.eth.waitForTransactionReceipt(txn)
+    print(receipt)
+    return receipt.transactionHash.hex()
     
 def getDonorDetails(donor):
     txn = registrationContract.functions.getOrganizationName(donor).call({'from': donor})
