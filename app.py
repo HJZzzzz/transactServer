@@ -365,6 +365,12 @@ def retrieveProjectDetails():
         result['charity_number'] = charity['contact_number']
         result['charity_email'] = charity['email']
         result['charity_address'] = charity['physical_address']
+        donations = list(db.donations.find({"project_id": ObjectId(result['_id'])}))
+        num = 0
+        for d in donations:
+            num += d['amount']
+        print(num)
+        result['actual_amount'] = num
         return jsonify(result)
 
     except Exception as ex:
@@ -464,6 +470,11 @@ def retrieveAllProjects():
         for i in result:
             i['_id'] = str(i['_id'])
             i['charity_id'] = str(i['charity_id'])
+            num = 0
+            donations = list(db.donations.find({"project_id": ObjectId(i['_id'])}))
+            for d in donations:
+                num += d['amount']
+            i['actual_amount'] = num
             print(i)
 
         return jsonify(result)
@@ -482,7 +493,9 @@ def retrieveDonorsByProject():
             i['project_id'] = str(i['project_id'])
             i['donor'] = donor['username']
 
-        return jsonify(donations)
+        latestDonors = list(reversed(list(donations)))[0:10]
+
+        return jsonify(latestDonors)
     except Exception as ex:
         return jsonify({"error":str(ex)})
 
