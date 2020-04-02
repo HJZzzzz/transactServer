@@ -9,28 +9,23 @@ contract Registration {
   mapping(uint256 => Inspector) inspectorList;
   mapping(uint256 => address) public inspectorAddress; 
 
-
   struct Donor {
     uint256 id;
     string name;
-
     bool set;
   }
 
   struct Inspector {
     uint256 id;
     string name;
-
     bool set;
   }
 
   struct Organization {
     uint256 id;
     string name;
-
     bool set;
   }
-
 
   uint256 numDonors = 0;
   uint256 public numInspectors = 0;
@@ -82,13 +77,13 @@ event OrganizationApproval(address organization, address inspector);
     });
   }
 
-  function approveDonor(address _donorAddress) public onlyInspector{
+  function approveDonor(address _donorAddress) public onlyOwner{
     donors[_donorAddress].set = true;
     emit DonorApproval(_donorAddress,msg.sender);
   }
 
   //reject and suspend donor
-  function rejectDonor(address _donorAddress) public onlyInspector{
+  function rejectDonor(address _donorAddress) public onlyOwner{
     donors[_donorAddress].set = false;
   }
 
@@ -138,12 +133,12 @@ event OrganizationApproval(address organization, address inspector);
     });
   }
 
-  function approveOrganization(address _organizationAddress) public onlyInspector{
+  function approveOrganization(address _organizationAddress) public onlyOwner{
     organizations[_organizationAddress].set = true;
     emit OrganizationApproval(_organizationAddress, msg.sender);
   }
 
-  function rejectOrganization(address _organizationAddress) public onlyInspector{
+  function rejectOrganization(address _organizationAddress) public onlyOwner{
     organizations[_organizationAddress].set = false;
   }
 

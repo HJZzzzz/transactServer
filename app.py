@@ -606,11 +606,13 @@ def loginCharity():
             }
         )
 
-
 @app.route("/admin/login", methods=['GET'])
 def loginAdmin():
     if request.args.get("password") == "admin" and request.args.get("username") == "admin":
-        return jsonify({"code": 200})
+        return jsonify({
+            "code": 200,
+            "eth_address": blockchainSetup.inspectorAddress
+            })
     else:
         return jsonify({"code": 400, "message": "Username and Password are not matched!"})
 
