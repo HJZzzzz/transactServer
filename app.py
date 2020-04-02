@@ -68,7 +68,7 @@ def registerDonor():
     donor_id = ''
     try:
         address = request.form.get("eth_address")
-
+        #TODO: check address exists or not before add new record
         txn = blockchainSetup.registerDonor(address, request.form.get("full_name"))
         new_donor = {
             "username": request.form.get("username"),
@@ -651,16 +651,18 @@ def loginDonor():
             print(":")
             if(approval):
                 return jsonify(
-                    {"id": str(results["_id"]),
-                     "username": results["username"],
-                     "eth_address": results["eth_address"]
+                    {   
+                        "code": 200,
+                        "id": str(results["_id"]),
+                        "username": results["username"],
+                        "eth_address": results["eth_address"]
                      }
                 )
             else:
-                return jsonify({"error": "Your account is still waiting for approval!"})
+                return jsonify({"code":400, "message": "Your account is still waiting for approval!"})
 
         else:
-            return jsonify({"error": "username or password not correct"})
+            return jsonify({"code":400, "message": "username or password not correct"})
 
     except Exception as ex:
         # print(ex)
@@ -674,20 +676,26 @@ def loginDonor():
 def loginCharity():
     charities = db.charities
     try:
+        print("username", request.args.get("username"))
         results = charities.find_one({"username": request.args.get("username")})
-        print(results)
-        if (results["password"] == request.args.get("password")):
+        #approval = blockchainSetup.checkDonorApproval(results["approval_hash"])
+        
+        print("results: ", results)
+        if ( len(results) and results["password"] == request.args.get("password")):
             return jsonify(
-                {"id": str(results["_id"]),
-                 "username": results["username"],
-                 "eth_address": results["eth_address"]
-                 }
+                {
+                    "code":200,
+                    "id": str(results["_id"]),
+                    "username": results["username"],
+                    "eth_address": results["eth_address"]
+                }
             )
         else:
             return jsonify({
                 "code": 400,
                 "message": "username or password not correct"
                 })
+        
     except Exception as ex:
         print(ex)
         print(type(ex))
