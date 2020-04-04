@@ -11,7 +11,7 @@ from eth_typing import (
 web3 = Web3(Web3.HTTPProvider("http://localhost:8545"))
 accounts = web3.eth.accounts
 
-inspectorAddress = "0xcEE315c0faf79aB5cF5485bDFd83eF7461a3b235"
+inspectorAddress = "0x87E730eedaA75012e4ec7e6269760E59e15E6C9F"
 
 with open("./blockchain/build/contracts/Project.json") as project:
     info_json = json.load(project)
@@ -20,12 +20,11 @@ abi = info_json["abi"]
 projectContractAddress = '0xB6B5427C22a02Bc253FE35EE2b9c17D887DC5b29'
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
-
 with open("./blockchain/build/contracts/Registration.json") as regist:
     info_json = json.load(regist)
 abi = info_json["abi"]
 
-registrationContractAddress = '0x9Ef158bf3e3eA11cd8FE67d2F7b65953A86FaE7A'
+registrationContractAddress = '0x87E730eedaA75012e4ec7e6269760E59e15E6C9F'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -143,8 +142,10 @@ def confirmReceiveMoney(donation, charity):
 
 def registerProject(charity, beneficiaryListId, documentationId, beneficiaryGainedRatio):
     txn = projectContract.functions.registerProject(charity, beneficiaryListId, documentationId, beneficiaryGainedRatio).transact({'from': charity})
+    numProjects = projectContract.methods.numProjects().call()
+
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    return receipt.transactionHash.hex()
+    return receipt.transactionHash.hex(), numProjects
 
 
 def approveProject(inspector, projectId):

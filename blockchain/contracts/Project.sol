@@ -35,8 +35,8 @@ contract Project {
     mapping(uint256 => uint256) projectCheckingDetails; 
     mapping(uint256 => CharityProject) public projectList; 
     
-    uint256 numProjects; 
-    uint256 numChecks; 
+    uint256 public numProjects; 
+    uint256 public numChecks; 
     
     event ApprovalProject(address inspector, uint256 projectId);
     event RejectProject(address inspector, uint256 projectId);

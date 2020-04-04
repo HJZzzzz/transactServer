@@ -469,10 +469,11 @@ def registerProject():
         }
         documentation_id = db.documentation.insert_one(new_documentation)
 
-        txn = blockchainSetup.registerProject(charity, int(beneficiary_list_id), int(documentation_id), int(beneficiaryGainedRatio))
+        txn, numProjects = blockchainSetup.registerProject(charity, int(beneficiary_list_id), int(documentation_id), int(beneficiaryGainedRatio))
 
         new_project = {
             "project_name": request.form.get('project_name'),
+            "project_id_in_chain": numProjects, 
             "beneficiaryListId": beneficiary_list_id,
             "documentation": documentation_id,
             "beneficiaryListId": beneficiaryListId,
