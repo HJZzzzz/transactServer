@@ -3,6 +3,7 @@ from flask_cors import CORS
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import blockchainSetup
+import datetime
 from blockchainSetup import  web3
 from pymongo.errors import ConnectionFailure
 from bson.json_util import dumps
@@ -26,29 +27,39 @@ def testGet():
 
 @app.route("/makeDonation", methods=['POST'])
 def donate():
-    try:
-        charity = request.args.get("charityAddress")
-        amount = request.args.get("amount")
-        pid = request.args.get("projectId")
-        donor = request.args.get("donorAddress")
-        txn = blockchainSetup.make_donation(charity, amount, pid,donor)
-        new_donation = {
-            "amount": request.form.get("amount"),
-            "project_id": request.form.get("project_id"),
-            "donor_address": request.form.get("donor_address"),
-            "donation_time": request.form.get("donation_time"),
-            "donation_hash": txn,
-            "confirmed_hash": ''
-        }
+    # try:
+    amount = request.form.get("amount")
+    print(amount)
+    pid = request.form.get("project_id")
+    print(pid)
+    donor = request.form.get("donor_id")
+    print(donor)
+    result = db.donors.find_one({"_id": ObjectId(donor)})
+    print(result['eth_address'])
+    result1 = db.projects.find_one({"_id": ObjectId(pid)})
 
-        donation_id = db.donations.insert_one(new_donation)
+
+    txn = blockchainSetup.make_donation(int(amount), int(result1['project_solidity_id']), result['eth_address'])
+    print(txn)
+    new_donation = {
+        "amount": amount,
+        "project_id": pid,
+        "donor_id": donor,
+        "donation_time": str(datetime.now()),
+        "donation_hash": txn,
+        "confirmed_hash": ''
+    }
+
+
+    donation_id = db.donations.insert_one(new_donation)
+    print(str(donation_id))
     
-    except Exception as ex:
-        print(ex)
-        print(type(ex))
-        return jsonify(
-            {"error": str(ex)}
-        )
+    # except Exception as ex:
+    #     print(ex)
+    #     print(type(ex))
+    #     return jsonify(
+    #         {"error": str(ex)}
+    #     )
 
     print(donation_id)
     return jsonify(200)
@@ -580,32 +591,32 @@ def registerProject():
     try:
         
 
-        # new_beneficiary_list = {
-        #     "project_name": request.form.get('project_name'),
-        #     "beneficiaryList": request.form.getlist('beneficiaryList')
-        # }
-        # beneficiary_list_id = db.beneficiaryList.insert_one(new_beneficiary_list)
+        new_beneficiary_list = {
+            "project_name": request.form.get('project_name'),
+            "beneficiaryList": request.form.getlist('beneficiaryList')
+        }
+        beneficiary_list_id = db.beneficiaryList.insert_one(new_beneficiary_list)
 
-        # new_documentation = {
-        #     "project_name": request.form.get('project_name'),
-        #     'documentation': request.form.get('documentation')
-        # }
-        # documentation_id = db.documentation.insert_one(new_documentation)
+        new_documentation = {
+            "project_name": request.form.get('project_name'),
+            'documentation': request.form.get('documentation')
+        }
+        documentation_id = db.documentation.insert_one(new_documentation)
 
-        # txn = blockchainSetup.registerProject(charity, int(beneficiary_list_id), int(documentation_id), int(beneficiaryGainedRatio))
+        txn = blockchainSetup.registerProject(charity, int(beneficiary_list_id), int(documentation_id), int(beneficiaryGainedRatio))
 
         # need to get project id from blockchain
-
+        numProjects = blockchainSetup.projectContract.methods.numProjects().call()
+        print(numProjects)
         new_project = {
             "project_name": request.form.get('project_name'),
             "charity_address": request.form.get('charityAddress'),
-            # "beneficiaryListId": beneficiary_list_id,
-            # "documentation": documentation_id,
-            # "beneficiaryListId": beneficiaryListId,
-            # "documentation": documentationId,
+            "beneficiaryListId": beneficiary_list_id,
+            "documentation": documentation_id,
             "expire_date": request.form.get('expire_date'), 
             "target_amount": request.form.get('target_amount'),
             "description": request.form.get("description"),
+            "charity_id":numProjects,
             # "registration_hash": txn,
             "approval_hash": '',
             "reject_hash": ''
@@ -826,7 +837,8 @@ def dummyData():
                 "description": "A good charity Project balah balah balah balah balah balah balah balah",
                 "registration_hash": "yeah",
                 "approval_hash": 'yes',
-                "reject_hash": 'oh'
+                "reject_hash": 'oh',
+                'project_solidity_id':p
             }
             project_id = db.projects.insert_one(new_project)
 

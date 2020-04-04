@@ -16,9 +16,9 @@ with open("./blockchain/build/contracts/Project.json") as project:
 abi = info_json["abi"]
 
 
-# inspectorAddress = "0x5cd538D8740E40A3dBb2f13a9944285A779D69fd"
+inspectorAddress = web3.eth.accounts[0]
 
-projectContractAddress = '0x3C7e0378f832dB9Dcc750D477cD89A3cA845F843'
+projectContractAddress = '0x3635426da885Bc3b7377592E801Ffd283d25dDb4'
 
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
@@ -28,7 +28,7 @@ with open("./blockchain/build/contracts/Registration.json") as regist:
 abi = info_json["abi"]
 
 
-registrationContractAddress = '0x02418eF857618608D717cC3b300Db3F2CEb9F7aA'
+registrationContractAddress = '0x4277ea27Ebe5369EfB5B4BFdB9306C658904C181'
 
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
@@ -37,13 +37,13 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
     info_json = json.load(donation)
 abi = info_json["abi"]
 
-donationContractAddress = '0xeF1E8Eb64446460023556E534089130fa64F59e3'
+donationContractAddress = '0xff0f5211eA5a4E6966de614DAaF8ae7Af49A3000'
 
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
 
-def make_donation(charity, amount, pid, donor):
-    txn = donationContract.functions.makeDonation(charity, amount, pid)
+def make_donation(amount, pid, donor):
+    txn = donationContract.functions.makeDonation(amount, pid)
     txn = txn.transact({'from': donor})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     print(receipt)
