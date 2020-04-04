@@ -15,9 +15,9 @@ with open("./blockchain/build/contracts/Project.json") as project:
     info_json = json.load(project)
 abi = info_json["abi"]
 
-inspectorAddress = "0x5cd538D8740E40A3dBb2f13a9944285A779D69fd"
+# inspectorAddress = "0x5cd538D8740E40A3dBb2f13a9944285A779D69fd"
 
-projectContractAddress = '0x455B070703DB6ba3395b7eEe68b8cF3467b4dC76'
+projectContractAddress = '0x25427fc62005b40763061AA9F994d0a1d9A90B71'
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
 
@@ -26,7 +26,7 @@ with open("./blockchain/build/contracts/Registration.json") as regist:
 abi = info_json["abi"]
 
 
-registrationContractAddress = '0x383Bb38f91104A5f08668337047BFeD7d8d0A74E'
+registrationContractAddress = '0x3981d9bb5998009B5407500f55C66277da28557a'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -34,7 +34,7 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
     info_json = json.load(donation)
 abi = info_json["abi"]
 
-donationContractAddress = '0xb0105D6491f979E61197200CB523C9e11a534209'
+donationContractAddress = '0x87c8638CC42f6cBf05269d716AEb94cA17f6ef9b'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
 
@@ -162,12 +162,26 @@ def checkDonorApproval(txn_hash):
         print(ex)
         return False
 
-def checkApproval(txn_hash):
+def checkApproval(txn_hash,donor):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
         logs = registrationContract.events.DonorApproval().processReceipt(receipt)
-        return True
+        if(logs[0]['args']['donor']==donor):
+            print(logs[0]['args']['donor'])
+            return True
+        return False
     except Exception as ex:
         print(ex)
         return False
 
+
+def checkProjectApproval(txn_hash,project):
+    try:
+        receipt = web3.eth.getTransactionReceipt(txn_hash)
+        logs = registrationContract.events.ApprovalProject().processReceipt(receipt)
+        if (logs[0]['args']['project'] == project):
+            return True
+        return False
+    except Exception as ex:
+        print(ex)
+        return False

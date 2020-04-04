@@ -431,6 +431,12 @@ def retrieveProjectDetails():
         result['charity_id'] = str(result['charity_id'])
         charity = db.charities.find_one({"_id":ObjectId(result['charity_id'])})
         result['charity_name'] = charity['name']
+
+        # approval = blockchainSetup.checkProjectApproval(result['approval_hash'])
+        # if(approval):
+        #     return jsonify(result)
+        # else:
+        #     return jsonify({"code": 400, "error": "This Project is still waiting for approval!"})
         return jsonify(result)
 
     except Exception as ex:
@@ -548,13 +554,13 @@ def loginDonor():
     try:
         results = donors.find_one({"username": request.args.get("username")})
         print(results)
-        print(":::")
+        # print(":::")
         if ( len(results) and results["password"] == request.args.get("password")):
-            print(results["approval_hash"])
-            print("::")
-            approval = blockchainSetup.checkApproval(results["approval_hash"])
-            print(approval)
-            print(":")
+            # print(results["approval_hash"])
+            # print("::")
+            approval = blockchainSetup.checkApproval(results["approval_hash"],results['eth_address'])
+            # print(approval)
+            # print(":")
             if(approval):
                 return jsonify(
                     {   "code": 200,
