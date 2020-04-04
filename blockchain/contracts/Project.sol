@@ -12,10 +12,6 @@ contract Project {
     address _owner = msg.sender;
     struct CharityProject {
         address projectOrganizationAdd;
-        uint256 beneficiaryListId;
-        uint256 projectDocumentationId; 
-        
-        uint256 inspectorId;
         uint256 beneficiaryGainedRatio;
         
         projectState state; 
@@ -26,7 +22,6 @@ contract Project {
 
     struct Check {
         uint256 projectId;
-        uint256 inspectorId; 
         projectState state; 
         string reason; 
     }
@@ -42,14 +37,11 @@ contract Project {
     event RejectProject(address inspector, uint256 projectId);
     event RegisterProject(address organizationAdd, uint256 projectId);
     event DistributeDonation(uint256 donationAmount, uint256 projectId);
-    function registerProject(address organizationAdd, uint256 beneficiaryListId, uint256 documentationId, uint256 beneficiaryGainedRatio) public payable returns (uint256){
+
+    function registerProject(address organizationAdd, uint256 beneficiaryGainedRatio) public payable returns (uint256){
         require(registrationContract.approvedOrganization(msg.sender), 'Only approved organisation can create project.');
-        uint256 numberOfInspectors = registrationContract.getNumOfInspectors();
         CharityProject memory newProject = CharityProject(
             organizationAdd, 
-            beneficiaryListId, 
-            documentationId,
-            (uint256)(block.timestamp % numberOfInspectors), // random number generate assigned inspectorId 
             beneficiaryGainedRatio,
             projectState.pending, 
             0,
@@ -61,7 +53,6 @@ contract Project {
         
         Check memory newCheck = Check(
             newProjectId,
-            newProject.inspectorId,
             projectState.pending,
             'null'
         );
@@ -73,7 +64,7 @@ contract Project {
         return newProjectId; 
     }
     
-    function approveProject(uint256 projectId) public onlyAppointedInspector(projectId) {
+    function approveProject(uint256 projectId) public onlyOwner() {
         require(
             projectList[projectId].state == projectState.pending,
             "Cannot deal with accepted or rejected projects"
@@ -87,7 +78,7 @@ contract Project {
         emit ApprovalProject(msg.sender, projectId);
     }
     
-    function rejectProject(uint256 projectId) public onlyAppointedInspector(projectId) {
+    function rejectProject(uint256 projectId) public onlyOwner() {
         require(
             projectList[projectId].state == projectState.pending,
             "Cannot deal with accepted or rejected projects"
@@ -105,9 +96,9 @@ contract Project {
         return projectList[projectId].state;
     }
 
-    function getInspectorIdByProjectId(uint256 projectId) public view returns(uint256){
-        return projectList[projectId].inspectorId;
-    }
+    // function getInspectorIdByProjectId(uint256 projectId) public view returns(uint256){
+    //     return projectList[projectId].inspectorId;
+    // }
 
     function getOrganizationAddByProjectId(uint256 projectId) public view returns(address){
         return projectList[projectId].projectOrganizationAdd;
@@ -119,12 +110,6 @@ contract Project {
         projectList[projectId].amountOfDonationBeneficiaryReceived += donationAmount * projectList[projectId].beneficiaryGainedRatio;
 
         emit DistributeDonation(donationAmount, projectId);
-    }
-    
-    modifier onlyAppointedInspector(uint256 projectId) {
-        address appointedInspectorAddress = registrationContract.getInspectorAddressById(projectList[projectId].inspectorId); 
-        require(msg.sender == appointedInspectorAddress, "Invalid inspector");
-        _;
     }
     
     modifier onlyOwner() {
