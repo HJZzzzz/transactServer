@@ -60,7 +60,7 @@ contract Project {
         checkingList[newCheckId] = newCheck; 
         projectCheckingDetails[newProjectId] = newCheckId;
         
-        emit RegisterProject(organizationAdd, newProjectId);
+        emit RegisterProject(msg.sender, newProjectId);
         return newProjectId; 
     }
     
