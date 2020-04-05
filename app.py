@@ -620,9 +620,7 @@ def registerProject():
         charity = request.form.get("charityAddress")
         beneficiaryGainedRatio = request.form.get('beneficiaryGainedRatio')
 
-        txn = "dfhkshflksjdlfs"
-        numProjects = 52
-        #txn, numProjects = blockchainSetup.registerProject(charity, int(beneficiaryGainedRatio))
+        txn, numProjects = blockchainSetup.registerProject(charity, int(beneficiaryGainedRatio))
 
         #store in DB
         new_project = {
@@ -642,16 +640,16 @@ def registerProject():
 
         #store cover image
         projectCover = request.files["projectCover"]
-        folder_path = "./projectCover/" + project_id
+        folder_path = "./projectCover/" + project_id + "/"
         Path(folder_path).mkdir(parents=True, exist_ok=True)
         filename = "cover.jpg"
         projectCover.save(os.path.join(folder_path, filename))
 
         #store beneficiary file
-        folder_path = "./beneficiary/" + project_id
+        folder_path = "./beneficiary/" + project_id + "/"
         Path(folder_path).mkdir(parents=True, exist_ok=True)
         filename = "beneficiary.xlsx"
-        beneficiaryListFile.save(folder_path, filename)
+        beneficiaryListFile.save(os.path.join(folder_path, filename))
 
         return jsonify({
                 "code": 200,
