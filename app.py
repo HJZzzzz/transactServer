@@ -117,7 +117,7 @@ def updateDonor():
     donor = request.form.get("eth_address")
 
     try:
-        txn = blockchainSetup.updateDonor(donor, request.form.get("full_name"))
+        # txn = blockchainSetup.updateDonor(donor, request.form.get("full_name"))
 
         result = donors.find_one_and_update(
             {"eth_address": donor},
@@ -283,12 +283,25 @@ def getDonorsByProject():
 def getProjectsByOrganization():
     charity = request.args.get("charityAddress")
     print(charity)
-    try: 
-        db_result = db.projects.find({"charity_address":charity})
+    try:
+        charity = db.charities.find_one({"eth_address":charity}) 
+        db_result = db.projects.find({"charity_id":ObjectId(charity['_id'])})
         result_list = []
-        for result in db_result:
-            result['_id'] = str(result['_id'])
+        for result in db_result:         
+            result['charity_id'] = str(result['charity_id'])
             print(result)
+            donations = list(db.donations.find({"project_id": ObjectId(result['_id'])}))
+            num = 0
+            numDonors = 0
+            for d in donations:
+                num += d['amount']
+                numDonors += 1
+            print(num)
+            print(numDonors)
+            # total amount: $$ of donations
+            result['actual_amount'] = num
+            result['num_donors'] = numDonors
+            result['_id'] = str(result['_id'])
             result_list.append(result)
         dic = {"code":200, "items":result_list}    
         return jsonify(dic)
@@ -304,14 +317,27 @@ def getProjectsByDonor():
     donor = request.args.get("donorAddress")
     print(donor)
     try: 
-        db1_result = db.donations.find({"donor_address":donor})
-        # project_id = str(db1_result['project_id'])
-        db_result = db.projects.find({"project_id":"0"})
+        donation_result = db.donations.find({"donor_address":donor})
         result_list = []
-        for result in db_result:
+        for result in donation_result:
+            project = db.projects.find_one({"_id":ObjectId(result['project_id'])})
+            donations = list(db.donations.find({"project_id": ObjectId(project['_id'])}))
             result['_id'] = str(result['_id'])
+            result['project_id'] = str(project['_id'])
+            project['_id'] = str(project['_id'])
+            num = 0
+            for d in donations:
+                num += d['amount']
+            print(num)
+            # total amount: $$ of donations
+            result['actual_amount'] = num
+            result['project_name'] = project['project_name']
+            # result['expire_date'] = project['expire_date']
+            result['target_amount'] = project['target_amount']
             print(result)
-            result_list.append(result)  
+            result_list.append(result)
+            #donated amount
+            #timestamp
         dic = {"code":200, "items":result_list}    
         return jsonify(dic)
         
@@ -426,7 +452,7 @@ def updateOrganization():
     charity = request.form.get("eth_address")
 
     try:
-        txn = blockchainSetup.updateOrganization(charity, request.form.get("full_name"))
+        # txn = blockchainSetup.updateOrganization(charity, request.form.get("full_name"))
 
         result = charities.find_one_and_update(
             {"eth_address": charity},
