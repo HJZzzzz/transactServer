@@ -20,7 +20,7 @@ abi = info_json["abi"]
 
 inspectorAddress = web3.eth.accounts[0]
 
-projectContractAddress = '0x3635426da885Bc3b7377592E801Ffd283d25dDb4'
+projectContractAddress = '0xAdBa0394368eDccB3f2763E35A3122b7427a8d94'
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
 with open("./blockchain/build/contracts/Registration.json") as regist:
@@ -28,7 +28,7 @@ with open("./blockchain/build/contracts/Registration.json") as regist:
 abi = info_json["abi"]
 
 
-registrationContractAddress = '0x87E730eedaA75012e4ec7e6269760E59e15E6C9F'
+registrationContractAddress = '0x92943CE889f4036F6D94238E659B74d2F64681aC'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -37,7 +37,7 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
 abi = info_json["abi"]
 
 
-donationContractAddress = '0x5090bef9dE3eA1b1F49D0aeb343fEe62762498a4'
+donationContractAddress = '0x1D31b16263435c2Ff0e29CA78da88166A65AB06C'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
 
@@ -153,15 +153,17 @@ def confirmReceiveMoney(donation, charity):
 
 
 def registerProject(charity, beneficiaryGainedRatio):
+    numProjects = projectContract.functions.numProjects().call()
     txn = projectContract.functions.registerProject(charity, beneficiaryGainedRatio).transact({'from': charity})
-    numProjects = projectContract.methods.numProjects().call()
 
     receipt = web3.eth.waitForTransactionReceipt(txn)
     return receipt.transactionHash.hex(), numProjects
 
 
 def approveProject(inspector, projectId):
-    txn = projectContract.functions.approveProject(projectId)({'from': inspector})
+    print(type(projectId))
+    txn = projectContract.functions.approveProject(projectId)({'from': web3.eth.accounts[0]})
+    print(txn)
     receipt = web3.eth.waitForTransactionReceipt(txn)
     return receipt.transactionHash.hex()
 
