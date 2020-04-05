@@ -607,8 +607,8 @@ def registerProject():
         result = projects.find_one_and_update(
             {"project_solidity_id": numProjects},
             {"$set":{
-                "beneficiaryListId":beneficiary_list_id, 
-                "documentationId": documentation_id
+                "beneficiaryListId":beneficiary_list_id.inserted_id, 
+                "documentationId": documentation_id.inserted_id
             }
             }
         )
@@ -637,7 +637,7 @@ def approveProject():
     try:
         txn = blockchainSetup.approveProject(inspector, int(project_solidity_id))
         result = projects.find_one_and_update(
-            {"project_solidity_id": project_solidity_id},
+            {"project_solidity_id": int(project_solidity_id)},
             {"$set":{
                 "approval_hash":txn
             }
@@ -656,13 +656,13 @@ def approveProject():
 def rejectProject():
     projects = db.projects
 
-    project = request.args.get('project_solidity_id')
-    inspector = request.args.get('inspectorAddress')
+    project_solidity_id = request.form.get('project_solidity_id')
+    inspector = request.form.get('inspectorAddress')
 
     try:
-        txn = blockchainSetup.rejectProject(inspector, project)
+        txn = blockchainSetup.rejectProject(inspector, int(project_solidity_id))
         result = projects.find_one_and_update(
-            {"project_solidity_id": project_solidity_id},
+            {"project_solidity_id": int(project_solidity_id)},
             {"$set":{
                 "approval_hash":txn
             }

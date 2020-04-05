@@ -38,10 +38,10 @@ contract Project {
     event RegisterProject(address organizationAdd, uint256 projectId);
     event DistributeDonation(uint256 donationAmount, uint256 projectId);
 
-    function registerProject(address organizationAdd, uint256 beneficiaryGainedRatio) public payable returns (uint256){
+    function registerProject(uint256 beneficiaryGainedRatio) public payable returns (uint256){
         require(registrationContract.approvedOrganization(msg.sender), 'Only approved organisation can create project.');
         CharityProject memory newProject = CharityProject(
-            organizationAdd, 
+            msg.sender, 
             beneficiaryGainedRatio,
             projectState.pending, 
             0,
