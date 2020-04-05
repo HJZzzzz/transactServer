@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -10,6 +10,8 @@ from datetime import datetime
 import os
 import pandas as pd
 from pathlib import Path
+import copy
+
 
 app = Flask(__name__)
 title = "TransACT Server"
@@ -593,7 +595,6 @@ def registerProject():
         #register to blockchain
         charity = request.form.get("charityAddress")
         beneficiaryGainedRatio = request.form.get('beneficiaryGainedRatio')
-
         txn, numProjects = blockchainSetup.registerProject(charity, int(beneficiaryGainedRatio))
 
         #store in DB
@@ -623,8 +624,9 @@ def registerProject():
         folder_path = "./beneficiary/" + project_id + "/"
         Path(folder_path).mkdir(parents=True, exist_ok=True)
         filename = "beneficiary.xlsx"
-        beneficiaryListFile.save(os.path.join(folder_path, filename))
-
+        #export df to excel
+        df.to_excel(os.path.join(folder_path, filename), index=False)
+ 
         return jsonify({
                 "code": 200,
                 "project_id": project_id, 
@@ -637,6 +639,17 @@ def registerProject():
             {"code": 400,
             "message": str(ex)}
         )
+
+@app.route("/beneficiaryFile", methods=['get'])
+def getBeneficiaryListFile():
+    projectId = request.args.get("id")
+    file_path = "./beneficiary/" + projectId + "/beneficiary.xlsx"
+    return send_file(file_path, attachment_filename='beneficiary.xlsx')
+
+@app.route("/beneficiaryFileFormat", methods=['get'])
+def getBeneficiaryFormatFile():
+    file_path = "./beneficiary/beneficiary.xlsx"
+    return send_file(file_path, attachment_filename='beneficiary.xlsx')
 
 @app.route("/approveProject", methods=['POST'])
 def approveProject():
