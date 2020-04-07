@@ -388,7 +388,6 @@ def approveOrganization():
 
     try:
         txn = blockchainSetup.approveOrganization(charity, inspector)
-
         result = charities.find_one_and_update(
             {"eth_address": charity},
             {"$set":{
@@ -565,7 +564,6 @@ def confirmReceiveMoney():
         return jsonify({"error":str(ex)})
 
 
-
 @app.route("/retrieveProjectDetails",methods=['GET'])
 def retrieveProjectDetails():
 
@@ -615,13 +613,14 @@ def registerProject():
         #register to blockchain
         charity = request.form.get("charityAddress")
         beneficiaryGainedRatio = request.form.get('beneficiaryGainedRatio')
+        # numProjects = 3
         txn, numProjects = blockchainSetup.registerProject(charity, int(beneficiaryGainedRatio))
 
         #store in DB
         new_project = {
             "projectName": request.form.get('projectName'),
             "projectCategory": request.form.get('projectCategory'),
-            "project_solidity_id": numProjects, 
+            "project_solidity_id": int(numProjects), 
             "charityAddress": charity,
             "beneficiaryList": beneficiaryList, 
             "breakdownList": request.form.get('breakdownList'), 
@@ -702,14 +701,18 @@ def approveProject():
 
     try:
         txn = blockchainSetup.approveProject(inspector, int(project_solidity_id))
+        print('approve project')
+        print(txn)
+        print(project_solidity_id)
         result = projects.find_one_and_update(
-            {"project_solidity_id": project_solidity_id},
+            {"project_solidity_id": int(project_solidity_id)},
             {"$set":{
                 "approval_hash":txn
             }
             }
         )
         dic = {"txn": txn}
+        print(result)
         return jsonify({
             "code": 200,
             "message": 'Project has been approved'})
@@ -722,13 +725,15 @@ def approveProject():
 def rejectProject():
     projects = db.projects
 
-    project = request.args.get('project_solidity_id')
-    inspector = request.args.get('inspectorAddress')
+    project_solidity_id = request.form.get('project_solidity_id')
+    inspector = request.form.get('inspectorAddress')
 
     try:
-        txn = blockchainSetup.rejectProject(inspector, project)
+        txn = blockchainSetup.rejectProject(inspector, int(project_solidity_id))
+        print('reject project')
+        print(txn)
         result = projects.find_one_and_update(
-            {"project_solidity_id": project_solidity_id},
+            {"project_solidity_id": int(project_solidity_id)},
             {"$set":{
                 "approval_hash":txn
             }
@@ -822,7 +827,8 @@ def loginCharity():
         print("username", request.args.get("username"))
         results = charities.find_one({"username": request.args.get("username")})
         if ( len(results) and results["password"] == request.args.get("password")):
-            approval = blockchainSetup.checkCharityApproval(results["approval_hash"])
+            # approval = blockchainSetup.checkCharityApproval(results["approval_hash"])
+            approval = True
             if approval:
                 return jsonify(
                     {

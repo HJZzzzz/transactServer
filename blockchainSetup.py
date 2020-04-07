@@ -11,20 +11,20 @@ from eth_typing import (
 web3 = Web3(Web3.HTTPProvider("http://localhost:8545"))
 accounts = web3.eth.accounts
 
-inspectorAddress = "0xa3C624C4F57f8f93E73D0aC6B2712374f1EAE843"
+inspectorAddress = "0xd40c7BC8ED7325077Ad5532f7feC8917F352812d"
 
 with open("./blockchain/build/contracts/Project.json") as project:
     info_json = json.load(project)
 abi = info_json["abi"]
 
-projectContractAddress = '0x8E4b50c82a592E52468fb990e2356F5472715268'
+projectContractAddress = '0xd40c7BC8ED7325077Ad5532f7feC8917F352812d'
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
 with open("./blockchain/build/contracts/Registration.json") as regist:
     info_json = json.load(regist)
 abi = info_json["abi"]
 
-registrationContractAddress = '0x68cEeb0a8aDaA25a90e2Bba9eD4c594658DDDc94'
+registrationContractAddress = '0xd40c7BC8ED7325077Ad5532f7feC8917F352812d'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -32,7 +32,7 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
     info_json = json.load(donation)
 abi = info_json["abi"]
 
-donationContractAddress = '0x533D0d7153A173aCa6C8EaD3D5fFeEA042612577'
+donationContractAddress = '0xd40c7BC8ED7325077Ad5532f7feC8917F352812d'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
 
@@ -104,29 +104,25 @@ def registerOrganization(charity, name):
 
 def approveOrganization(charity, inspector):
     txn = registrationContract.functions.approveOrganization(charity).transact({'from': inspector})
-    receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
+    receipt = web3.eth.waitForTransactionReceipt(txn) 
     return receipt.transactionHash.hex()
 
 
 def rejectOrganization(charity, inspector):
     txn = registrationContract.functions.rejectOrganization(charity).transact({'from': inspector})
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
     return receipt.transactionHash.hex()
 
 
 def updateOrganization(charity, name):
     txn = registrationContract.functions.updateOrganization(charity, name).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
     return receipt.transactionHash.hex()
 
 
 def deleteOrganization(charity):
     txn = registrationContract.functions.deleteOrganization(charity).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
     return receipt.transactionHash.hex()
 
 
@@ -143,26 +139,26 @@ def getOrganizationName(charity):
 def confirmReceiveMoney(donation, charity):
     txn = donationContract.functions.confirmReceiveMoney(donation).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
     return receipt.transactionHash.hex()
 
 
 def registerProject(charity, beneficiaryGainedRatio):
     numProjects = projectContract.functions.numProjects().call()
-    txn = projectContract.functions.registerProject(beneficiaryGainedRatio).transact({'from': charity})
-
+    txn = registrationContract.functions.registerProject(beneficiaryGainedRatio).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    return receipt.transactionHash.hex(), numProjects
+    return receipt.transactionHash.hex(), numProjects 
 
 
 def approveProject(inspector, projectId):
-    txn = projectContract.functions.approveProject(projectId)({'from': inspector})
+    int_id = int(projectId)
+    txn = registrationContract.functions.approveProject(int_id).transact({'from': inspector})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     return receipt.transactionHash.hex()
 
 
 def rejectProject(inspector, projectId):
-    txn = projectContract.functions.rejectProject(projectId)({'from': inspector})
+    int_id = int(projectId)
+    txn = registrationContract.functions.rejectProject(int_id).transact({'from': inspector})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     return receipt.transactionHash.hex()
 

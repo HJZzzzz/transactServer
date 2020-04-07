@@ -8,8 +8,9 @@ contract Project {
     constructor(Registration registrationAddress) public {
         registrationContract = registrationAddress;
     }
-    enum projectState { pending, approved, rejected }
     address _owner = msg.sender;
+
+    enum projectState { pending, approved, rejected }
     struct CharityProject {
         address projectOrganizationAdd;
         uint256 beneficiaryGainedRatio;
@@ -20,18 +21,9 @@ contract Project {
         uint256 amountOfDonationBeneficiaryReceived; 
     }
 
-    struct Check {
-        uint256 projectId;
-        projectState state; 
-        string reason; 
-    }
-    
-    mapping(uint256 => Check) checkingList; 
-    mapping(uint256 => uint256) projectCheckingDetails; 
     mapping(uint256 => CharityProject) public projectList; 
     
     uint256 public numProjects; 
-    uint256 public numChecks; 
     
     event ApprovalProject(address inspector, uint256 projectId);
     event RejectProject(address inspector, uint256 projectId);
@@ -51,15 +43,6 @@ contract Project {
         uint256 newProjectId = numProjects++; 
         projectList[newProjectId] = newProject; 
         
-        Check memory newCheck = Check(
-            newProjectId,
-            projectState.pending,
-            'null'
-        );
-        uint256 newCheckId = numChecks++; 
-        checkingList[newCheckId] = newCheck; 
-        projectCheckingDetails[newProjectId] = newCheckId;
-        
         emit RegisterProject(msg.sender, newProjectId);
         return newProjectId; 
     }
@@ -69,12 +52,7 @@ contract Project {
             projectList[projectId].state == projectState.pending,
             "Cannot deal with accepted or rejected projects"
         );
-        
         projectList[projectId].state = projectState.approved;
-        
-        uint256 checkId = projectCheckingDetails[projectId];
-        checkingList[checkId].state = projectState.approved;
-        // checkingList[checkId].reason = approveReason;
         emit ApprovalProject(msg.sender, projectId);
     }
     
@@ -83,12 +61,7 @@ contract Project {
             projectList[projectId].state == projectState.pending,
             "Cannot deal with accepted or rejected projects"
         );
-        
         projectList[projectId].state = projectState.rejected;
-        
-        uint256 checkId = projectCheckingDetails[projectId];
-        checkingList[checkId].state = projectState.rejected;
-        // checkingList[checkId].reason = rejectReason;
         emit RejectProject(msg.sender, projectId);
     }
     
