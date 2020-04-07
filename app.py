@@ -11,6 +11,9 @@ import os
 import pandas as pd
 from pathlib import Path
 import copy
+import io
+import base64
+from PIL import Image
 
 
 app = Flask(__name__)
@@ -564,7 +567,12 @@ def confirmReceiveMoney():
     except Exception as ex:
         return jsonify({"error":str(ex)})
 
-
+def get_byte_image(image_path):
+    img = Image.open(image_path, mode='r')
+    img_byte_arr = io.BytesIO()
+    img.save(img_byte_arr, format='JPEG')
+    encoded_img = base64.encodebytes(img_byte_arr.getvalue()).decode('ascii')
+    return encoded_img
 
 @app.route("/retrieveProjectDetails",methods=['GET'])
 def retrieveProjectDetails():
@@ -572,6 +580,10 @@ def retrieveProjectDetails():
     try:
         result = db.projects.find_one({"_id":ObjectId(request.args.get("id"))})
         result['_id'] = str(result['_id'])
+        image_path = './projectCover/'+ result['_id'] + '/cover.jpg'
+        print(image_path)
+        image = get_byte_image(image_path)
+        result["image"] = image
         result['charity_id'] = str(result['charity_id'])
         charity = db.charities.find_one({"_id":ObjectId(result['charity_id'])})
         result['charity_name'] = charity['name']
@@ -599,59 +611,114 @@ def testImageUpload():
 
 @app.route("/registerProject", methods=['POST'])
 def registerProject():
+    projectId = request.form.get("projectId")
+
     try:
-        beneficiaryListFile = request.files["beneficiaryList"]
-        df = pd.read_excel(beneficiaryListFile)
-        if list(df.columns) != ["beneficiary", "remark"]:
-            return jsonify({"code": 400, "message":"Invalid beneficiary file format."})
+        if  projectId == "0":
+            beneficiaryListFile = request.files["beneficiaryList"]
+            df = pd.read_excel(beneficiaryListFile)
+            if list(df.columns) != ["beneficiary", "remark"]:
+                return jsonify({"code": 400, "message":"Invalid beneficiary file format."})
 
-        beneficiaryList = []
-        for index, row in df.iterrows():
-            beneficiaryList.append({
-                "name": row["beneficiary"],
-                "remark": row["remark"]
-                })
+            beneficiaryList = []
+            for index, row in df.iterrows():
+                beneficiaryList.append({
+                    "name": row["beneficiary"],
+                    "remark": row["remark"]
+                    })
 
-        #register to blockchain
-        charity = request.form.get("charityAddress")
-        beneficiaryGainedRatio = request.form.get('beneficiaryGainedRatio')
-        txn, numProjects = blockchainSetup.registerProject(charity, int(beneficiaryGainedRatio))
+            #register to blockchain
+            charity = request.form.get("charityAddress")
+            beneficiaryGainedRatio = request.form.get('beneficiaryGainedRatio')
+            txn, numProjects = blockchainSetup.registerProject(charity, int(beneficiaryGainedRatio))
 
-        #store in DB
-        new_project = {
-            "projectName": request.form.get('projectName'),
-            "projectCategory": request.form.get('projectCategory'),
-            "project_solidity_id": numProjects, 
-            "charityAddress": charity,
-            "beneficiaryList": beneficiaryList, 
-            "breakdownList": request.form.get('breakdownList'), 
-            "expirationDate": request.form.get('expirationDate'), 
-            "fundTarget": request.form.get('fundTarget'),
-            "description": request.form.get("description"),
-            "registration_hash": txn,
-            "approval_hash": '',
-        }
-        project_id = str(db.projects.insert_one(new_project).inserted_id)
+            #store in DB
+            new_project = {
+                "projectName": request.form.get('projectName'),
+                "projectCategory": request.form.get('projectCategory'),
+                "project_solidity_id": numProjects, 
+                "charity_id": request.form.get('charity_id'),
+                "charityAddress": charity,
+                "beneficiaryList": beneficiaryList, 
+                "breakdownList": request.form.get('breakdownList'), 
+                "expirationDate": request.form.get('expirationDate'), 
+                "fundTarget": request.form.get('fundTarget'),
+                "description": request.form.get("description"),
+                "registration_hash": txn,
+                "approval_hash": '',
+            }
+            project_id = str(db.projects.insert_one(new_project).inserted_id)
 
-        #store cover image
-        projectCover = request.files["projectCover"]
-        folder_path = "./projectCover/" + project_id + "/"
-        Path(folder_path).mkdir(parents=True, exist_ok=True)
-        filename = "cover.jpg"
-        projectCover.save(os.path.join(folder_path, filename))
+            #store cover image
+            projectCover = request.files["projectCover"]
+            folder_path = "./projectCover/" + project_id + "/"
+            Path(folder_path).mkdir(parents=True, exist_ok=True)
+            filename = "cover.jpg"
+            projectCover.save(os.path.join(folder_path, filename))
 
-        #store beneficiary file
-        folder_path = "./beneficiary/" + project_id + "/"
-        Path(folder_path).mkdir(parents=True, exist_ok=True)
-        filename = "beneficiary.xlsx"
-        #export df to excel
-        df.to_excel(os.path.join(folder_path, filename), index=False)
- 
-        return jsonify({
-                "code": 200,
-                "project_id": project_id, 
-                })
-        
+            #store beneficiary file
+            folder_path = "./beneficiary/" + project_id + "/"
+            Path(folder_path).mkdir(parents=True, exist_ok=True)
+            filename = "beneficiary.xlsx"
+            #export df to excel
+            df.to_excel(os.path.join(folder_path, filename), index=False)
+    
+            return jsonify({
+                    "code": 200,
+                    "project_id": project_id, 
+                    })
+        else:
+            beneficiaryList = []
+            if "beneficiaryList" in request.files:
+                df = pd.read_excel(beneficiaryListFile)
+                if list(df.columns) != ["beneficiary", "remark"]:
+                    return jsonify({"code": 400, "message":"Invalid beneficiary file format."})        
+                for index, row in df.iterrows():
+                    beneficiaryList.append({
+                        "name": row["beneficiary"],
+                        "remark": row["remark"]
+                        })
+
+                #store beneficiary file
+                folder_path = "./beneficiary/" + projectId + "/"
+                Path(folder_path).mkdir(parents=True, exist_ok=True)
+                filename = "beneficiary.xlsx"
+                #export df to excel
+                df.to_excel(os.path.join(folder_path, filename), index=False)
+            else: 
+                print("file unchanged")
+            update_dic = {
+                        "projectName": request.form.get('projectName'),
+                        "projectCategory": request.form.get('projectCategory'),
+                        "breakdownList": request.form.get('breakdownList'), 
+                        "expirationDate": request.form.get('expirationDate'), 
+                        "fundTarget": request.form.get('fundTarget'),
+                        "description": request.form.get("description"),
+                        "approval_hash": '',
+            }
+            if len(beneficiaryList) > 0:
+                update_dic["beneficiaryList"] = beneficiaryList
+
+            #update in DB
+            result = db.projects.find_one_and_update(
+                    {"_id": ObjectId(projectId)},
+                        {"$set":update_dic
+                    })        
+
+            if "projectCover" in request.files:
+                projectCover = request.files["projectCover"]
+                folder_path = "./projectCover/" + projectId + "/"
+                Path(folder_path).mkdir(parents=True, exist_ok=True)
+                filename = "cover.jpg"
+                projectCover.save(os.path.join(folder_path, filename))
+            else: 
+                print("projectCover unchanged")
+               
+            return jsonify({
+                    "code": 200,
+                    "project_id": projectId, 
+                    })
+
     except Exception as ex:
         print(ex)
         print(type(ex))
