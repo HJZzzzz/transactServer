@@ -11,20 +11,20 @@ from eth_typing import (
 web3 = Web3(Web3.HTTPProvider("http://localhost:8545"))
 accounts = web3.eth.accounts
 
-inspectorAddress = "0xa3C624C4F57f8f93E73D0aC6B2712374f1EAE843"
+inspectorAddress = "0xf6678299Ffda65dBccc9578ec4bFA23715B0D2af"
 
 with open("./blockchain/build/contracts/Project.json") as project:
     info_json = json.load(project)
 abi = info_json["abi"]
 
-projectContractAddress = '0x8E4b50c82a592E52468fb990e2356F5472715268'
+projectContractAddress = '0xBC5f95E8bB8aA7fDacf32e468b8E3C044c9ef17d'
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
 with open("./blockchain/build/contracts/Registration.json") as regist:
     info_json = json.load(regist)
 abi = info_json["abi"]
 
-registrationContractAddress = '0x68cEeb0a8aDaA25a90e2Bba9eD4c594658DDDc94'
+registrationContractAddress = '0x88ABAaccD23F0C6a34E063Ec7eF3e9660D6cff99'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -32,7 +32,7 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
     info_json = json.load(donation)
 abi = info_json["abi"]
 
-donationContractAddress = '0x533D0d7153A173aCa6C8EaD3D5fFeEA042612577'
+donationContractAddress = '0x674665f533b13eC9b0CAD7c5B372Aa1E93C56670'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
 
@@ -171,6 +171,15 @@ def checkDonorApproval(txn_hash):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
         logs = registrationContract.events.DonorApproval().processReceipt(receipt)
+        return True
+    except Exception as ex:
+        print(ex)
+        return False
+
+def checkCharityApproval(txn_hash):
+    try:
+        receipt = web3.eth.getTransactionReceipt(txn_hash)
+        logs = registrationContract.events.OrganizationApproval().processReceipt(receipt)
         return True
     except Exception as ex:
         print(ex)
