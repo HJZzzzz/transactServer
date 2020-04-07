@@ -38,7 +38,7 @@ contract Project {
     event RegisterProject(address organizationAdd, uint256 projectId);
     event DistributeDonation(uint256 donationAmount, uint256 projectId);
 
-    function registerProject(uint256 beneficiaryGainedRatio) public payable returns (uint256){
+    function registerProject(uint256 beneficiaryGainedRatio) public returns (uint256){
         require(registrationContract.approvedOrganization(msg.sender), 'Only approved organisation can create project.');
         CharityProject memory newProject = CharityProject(
             msg.sender, 
@@ -99,7 +99,8 @@ contract Project {
     // function getInspectorIdByProjectId(uint256 projectId) public view returns(uint256){
     //     return projectList[projectId].inspectorId;
     // }
-
+    
+    // function stopProject
     function getOrganizationAddByProjectId(uint256 projectId) public view returns(address){
         return projectList[projectId].projectOrganizationAdd;
     }

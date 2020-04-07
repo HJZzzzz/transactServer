@@ -11,20 +11,20 @@ from eth_typing import (
 web3 = Web3(Web3.HTTPProvider("http://localhost:8545"))
 accounts = web3.eth.accounts
 
-inspectorAddress = "0xa3C624C4F57f8f93E73D0aC6B2712374f1EAE843"
+inspectorAddress = "0xd3f92AB6366e8f13a3c47BD30749daE9ab007668"
 
 with open("./blockchain/build/contracts/Project.json") as project:
     info_json = json.load(project)
 abi = info_json["abi"]
 
-projectContractAddress = '0xD90B9F52900A4Cf0587541450B4A0cAA580B2264'
+projectContractAddress = '0xd3f92AB6366e8f13a3c47BD30749daE9ab007668'
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
 with open("./blockchain/build/contracts/Registration.json") as regist:
     info_json = json.load(regist)
 abi = info_json["abi"]
 
-registrationContractAddress = '0xd8E139E081ef1BF51e41CE2fe0F3291Df7d55d82'
+registrationContractAddress = '0xd3f92AB6366e8f13a3c47BD30749daE9ab007668'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -32,7 +32,7 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
     info_json = json.load(donation)
 abi = info_json["abi"]
 
-donationContractAddress = '0xFe01D63A0145C7e13164183779c29fb9e7704ccA'
+donationContractAddress = '0x0E6ef1f11890443e14d201e535C223E8b04671bB'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
 
@@ -148,15 +148,15 @@ def confirmReceiveMoney(donation, charity):
 
 
 def registerProject(charity, beneficiaryGainedRatio):
+    numProjects = projectContract.functions.numProjects().call()
     txn = projectContract.functions.registerProject(beneficiaryGainedRatio).transact({'from': charity})
-    numProjects = projectContract.methods.numProjects().call()
 
     receipt = web3.eth.waitForTransactionReceipt(txn)
     return receipt.transactionHash.hex(), numProjects
 
 
 def approveProject(inspector, projectId):
-    txn = projectContract.functions.approveProject(projectId)({'from': inspectrror})
+    txn = projectContract.functions.approveProject(projectId)({'from': inspector})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     return receipt.transactionHash.hex()
 

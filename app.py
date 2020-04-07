@@ -594,9 +594,7 @@ def registerProject():
         charity = request.form.get("charityAddress")
         beneficiaryGainedRatio = request.form.get('beneficiaryGainedRatio')
 
-        txn = "dfhkshflksjdlfs"
-        numProjects = 52
-        #txn, numProjects = blockchainSetup.registerProject(charity, int(beneficiaryGainedRatio))
+        txn, numProjects = blockchainSetup.registerProject(charity, beneficiaryGainedRatio)
 
         #store in DB
         new_project = {
@@ -625,7 +623,7 @@ def registerProject():
         folder_path = "./beneficiary/" + project_id
         Path(folder_path).mkdir(parents=True, exist_ok=True)
         filename = "beneficiary.xlsx"
-        beneficiaryListFile.save(folder_path, filename)
+        beneficiaryListFile.save(os.path.join(folder_path, filename))
 
         return jsonify({
                 "code": 200,
@@ -640,6 +638,28 @@ def registerProject():
             "message": str(ex)}
         )
 
+@app.route("/getAllPendingProjects", methods=['GET'])
+def getAllPendingProjects():
+    try:
+        db_result = db.projects
+        result_list = []
+        all_result = db_result.find(
+            {"approval_hash": ''}
+        )
+        for result in all_result:
+            result['_id'] = str(result['_id'])
+            result_list.append(result)
+
+        return jsonify(
+            {"code": 200,
+            "items": result_list}
+        )
+    except Exception as ex:
+        return jsonify({
+                "code":400,
+                "message": str(ex)
+            })
+            
 @app.route("/approveProject", methods=['POST'])
 def approveProject():
     projects = db.projects 
