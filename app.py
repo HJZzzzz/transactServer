@@ -203,7 +203,7 @@ def getDonorDetails():
         # txn = blockchainSetup.getDonorDetails(donor)
         db_result = db.donors.find_one({"eth_address":donor})
         db_result['_id'] = str(db_result['_id'])
-        dic = {"code": 200, "message":db_result}
+        db_result["code"] = "200"
         return jsonify(db_result)
         
     except Exception as ex:
@@ -282,22 +282,16 @@ def getDonorsByProject():
 @app.route("/getProjectsByOrganization", methods=['GET'])
 def getProjectsByOrganization():
     charity = request.args.get("charityAddress")
-    print(charity)
     try:
-        charity = db.charities.find_one({"eth_address":charity}) 
-        db_result = db.projects.find({"charity_id":ObjectId(charity['_id'])})
+        db_result = db.projects.find({"charityAddress":charity})
         result_list = []
         for result in db_result:         
-            result['charity_id'] = str(result['charity_id'])
-            print(result)
             donations = list(db.donations.find({"project_id": ObjectId(result['_id'])}))
             num = 0
             numDonors = 0
             for d in donations:
                 num += d['amount']
                 numDonors += 1
-            print(num)
-            print(numDonors)
             # total amount: $$ of donations
             result['actual_amount'] = num
             result['num_donors'] = numDonors
@@ -542,7 +536,7 @@ def getCharityDetails():
         # txn = blockchainSetup.getDonorDetails(donor)
         db_result = db.charities.find_one({"eth_address":charity})
         db_result['_id'] = str(db_result['_id'])
-        dic = {"code": 200, "message":db_result}
+        db_result["code"] = 200,
         return jsonify(db_result)
         
     except Exception as ex:
@@ -797,11 +791,7 @@ def loginDonor():
         print(results)
         print(":::")
         if ( len(results) and results["password"] == request.args.get("password")):
-            print(results["approval_hash"])
-            print("::")
             approval = blockchainSetup.checkDonorApproval(results["approval_hash"])
-            print(approval)
-            print(":")
             if(approval):
                 return jsonify(
                     {   
@@ -831,18 +821,19 @@ def loginCharity():
     try:
         print("username", request.args.get("username"))
         results = charities.find_one({"username": request.args.get("username")})
-        #approval = blockchainSetup.checkDonorApproval(results["approval_hash"])
-        
-        print("results: ", results)
         if ( len(results) and results["password"] == request.args.get("password")):
-            return jsonify(
-                {
-                    "code":200,
-                    "id": str(results["_id"]),
-                    "username": results["username"],
-                    "eth_address": results["eth_address"]
-                }
-            )
+            approval = blockchainSetup.checkCharityApproval(results["approval_hash"])
+            if approval:
+                return jsonify(
+                    {
+                        "code":200,
+                        "id": str(results["_id"]),
+                        "username": results["username"],
+                        "eth_address": results["eth_address"]
+                    }
+                )
+            else:
+                return jsonify({"code":400, "message": "Your account is still waiting for approval!"})
         else:
             return jsonify({
                 "code": 400,
@@ -868,8 +859,6 @@ def loginAdmin():
             })
     else:
         return jsonify({"code": 400, "message": "Username and Password are not matched!"})
-
-
 
 @app.route("/adddummydata",methods=['GET'])
 def dummyData():
