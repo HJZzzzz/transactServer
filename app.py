@@ -27,42 +27,43 @@ def testGet():
 
 @app.route("/makeDonation", methods=['POST'])
 def donate():
-    # try:
-    amount = request.form.get("amount")
-    print(amount)
-    pid = request.form.get("project_id")
-    print(pid)
-    donor = request.form.get("donor_id")
-    print(donor)
-    result = db.donors.find_one({"_id": ObjectId(donor)})
-    print(result['eth_address'])
-    result1 = db.projects.find_one({"_id": ObjectId(pid)})
+    try:
+        amount = request.form.get("amount")
+        print(amount)
+        pid = request.form.get("project_id")
+        print(pid)
+        donor = request.form.get("donor_id")
+        print(donor)
+        result = db.donors.find_one({"_id": ObjectId(donor)})
+        print(result['eth_address'])
+        result1 = db.projects.find_one({"_id": ObjectId(pid)})
 
-    txn = "txn"
-    # txn = blockchainSetup.make_donation(int(amount), int(result1['project_solidity_id']), result['eth_address'])
-    print(txn)
-    new_donation = {
-        "amount": amount,
-        "project_id": ObjectId(pid),
-        "donor_id": ObjectId(donor),
-        "donation_time": str(datetime.datetime.now()),
-        "donation_hash": txn,
-        "confirmed_hash": ''
-    }
+        txn = "txn"
+        # txn = blockchainSetup.make_donation(int(amount), int(result1['project_solidity_id']), result['eth_address'])
+        print(txn)
+        new_donation = {
+            "amount": amount,
+            "project_id": ObjectId(pid),
+            "donor_id": ObjectId(donor),
+            "donation_time": str(datetime.datetime.now().strftime("%Y-%m-%d")),
+            "donation_hash": txn,
+            "confirmed_hash": ''
+        }
 
 
-    donation_id = db.donations.insert_one(new_donation)
-    print(str(donation_id))
+        donation_id = db.donations.insert_one(new_donation)
+        print(str(donation_id))
+        print(donation_id)
+        return jsonify(200)
     
-    # except Exception as ex:
-    #     print(ex)
-    #     print(type(ex))
-    #     return jsonify(
-    #         {"error": str(ex)}
-    #     )
+    except Exception as ex:
+        print(ex)
+        print(type(ex))
+        return jsonify(
+            {"error": str(ex)}
+        )
 
-    print(donation_id)
-    return jsonify(200)
+
 
 
 @app.route("/registerInspector", methods=['POST'])
@@ -531,23 +532,44 @@ def getCharityDetails():
             })    
 
 
-@app.route("/confirmReceiveMoney", methods=['POST'])
-def confirmReceiveMoney():
-    donations = db.donations
-    donation = request.args.get("donationId")
-    inspector = request.args.get("inspectorAddress")
+@app.route("/confirmMoney", methods=['POST'])
+def confirmMoney():
+
+    amount = request.form.get("amount")
+    project_id = request.form.get("project_id")
+    description = request.form.get("description")
     try:
-        txn = blockchainSetup.confirmReceiveMoney(donation, inspector)
-        result = donations.find_one_and_update(
-            {"_id": ObjectId(request.form.get("id"))},
-            {"$set":{
-                "comfirmed_hash": txn
-            }
-            }
-        )
+        # txn = blockchainSetup.confirmDonation(amount,project_id)
+        new_confirmation = {
+            "amount": amount,
+            "project_id": ObjectId(project_id),
+            "description": description,
+            "confirmation_time": str(datetime.datetime.now().strftime("%Y-%m-%d")),
+            "confirmation_hash": ''
+        }
+
+        confirmation_id = db.confirmations.insert_one(new_confirmation)
         return jsonify(200)
     except Exception as ex:
         return jsonify({"error":str(ex)})
+
+
+@app.route("/retrieveConfirmation", methods=['GET'])
+def retrieveConfirmation():
+
+    # try:
+    project_id = request.args.get("project_id")
+    result = list(db.confirmations.find({"project_id":ObjectId(project_id)}))
+    num = 0
+    for i in result:
+        i['_id'] = str(i['_id'])
+        i['project_id'] = str(i['project_id'])
+        num += int(i['amount'])
+
+    result1={'confirmations':result,'total_confirmation':num}
+    return jsonify({"code": 200, "result": result1})
+    # except Exception as ex:
+    #     return jsonify({"code": 400, "message": str(ex)})
 
 
 
