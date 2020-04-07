@@ -104,29 +104,25 @@ def registerOrganization(charity, name):
 
 def approveOrganization(charity, inspector):
     txn = registrationContract.functions.approveOrganization(charity).transact({'from': inspector})
-    receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
+    receipt = web3.eth.waitForTransactionReceipt(txn) 
     return receipt.transactionHash.hex()
 
 
 def rejectOrganization(charity, inspector):
     txn = registrationContract.functions.rejectOrganization(charity).transact({'from': inspector})
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
     return receipt.transactionHash.hex()
 
 
 def updateOrganization(charity, name):
     txn = registrationContract.functions.updateOrganization(charity, name).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
     return receipt.transactionHash.hex()
 
 
 def deleteOrganization(charity):
     txn = registrationContract.functions.deleteOrganization(charity).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
     return receipt.transactionHash.hex()
 
 
@@ -143,26 +139,26 @@ def getOrganizationName(charity):
 def confirmReceiveMoney(donation, charity):
     txn = donationContract.functions.confirmReceiveMoney(donation).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
     return receipt.transactionHash.hex()
 
 
 def registerProject(charity, beneficiaryGainedRatio):
     numProjects = projectContract.functions.numProjects().call()
-    txn = projectContract.functions.registerProject(beneficiaryGainedRatio).transact({'from': charity})
-
+    txn = registrationContract.functions.registerProject(beneficiaryGainedRatio).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    return receipt.transactionHash.hex(), numProjects
+    return receipt.transactionHash.hex(), numProjects 
 
 
 def approveProject(inspector, projectId):
-    txn = projectContract.functions.approveProject(projectId)({'from': inspectrror})
+    int_id = int(projectId)
+    txn = registrationContract.functions.approveProject(int_id).transact({'from': inspector})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     return receipt.transactionHash.hex()
 
 
 def rejectProject(inspector, projectId):
-    txn = projectContract.functions.rejectProject(projectId)({'from': inspector})
+    int_id = int(projectId)
+    txn = registrationContract.functions.rejectProject(int_id).transact({'from': inspector})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     return receipt.transactionHash.hex()
 

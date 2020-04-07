@@ -38,7 +38,7 @@ contract Donation is ERC721 {
         require(registrationContract.approvedDonor(msg.sender), 'Only approved donor can make registration.');
         address _charityAdd = projectContract.getOrganizationAddByProjectId(_projectId);
         require(registrationContract.approvedOrganization(_charityAdd));
-        require( uint(projectContract.checkProjectStatus(_projectId)) == 1 , 'Can only make donation to approved project.');
+        require(uint(projectContract.checkProjectStatus(_projectId)) == 1, 'Can only make donation to approved project.');
         // Donation storage donation = donations[_donationId];
         // super._mint(msg.sender,_donationId);
         donations[_donationId] = Donation({
