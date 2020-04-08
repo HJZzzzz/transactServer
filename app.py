@@ -669,6 +669,7 @@ def registerProject():
         else:
             beneficiaryList = []
             if "beneficiaryList" in request.files:
+                beneficiaryListFile = request.files["beneficiaryList"]
                 df = pd.read_excel(beneficiaryListFile)
                 if list(df.columns) != ["beneficiary", "remark"]:
                     return jsonify({"code": 400, "message":"Invalid beneficiary file format."})        
