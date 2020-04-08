@@ -8,7 +8,7 @@ contract Registration {
   mapping(address => Organization) public organizations;
   mapping(uint256 => Inspector) inspectorList;
   mapping(uint256 => address) public inspectorAddress; 
-  enum projectState { pending, approved, rejected }
+  enum projectState { pending, approved, rejected, stopped }
 
   struct CharityProject {
     address projectOrganizationAdd;
@@ -25,6 +25,7 @@ contract Registration {
     
   event ApprovalProject(address inspector, int projectId);
   event RejectProject(address inspector, int projectId);
+  event StopProject(address inspector, int projectId);
   event RegisterProject(address organizationAdd, int projectId);
   event DistributeDonation(uint256 donationAmount, int projectId);
 
@@ -237,6 +238,15 @@ event OrganizationApproval(address organization, address inspector);
     );
     projectList[projectId].state = projectState.rejected;
     emit RejectProject(msg.sender, projectId);
+  }
+
+  function stopProject(int projectId) public onlyOwner{
+    require(
+      projectList[projectId].state == projectState.approved,
+      "Cannot deal with unapproved projects"
+    );
+    projectList[projectId].state = projectState.stopped;
+    emit StopProject(msg.sender, projectId);
   }
 
 }
