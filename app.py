@@ -296,7 +296,7 @@ def getProjectsByOrganization():
             num = 0
             numDonors = 0
             for d in donations:
-                num += d['amount']
+                num += int(d['amount'])
                 numDonors += 1
             # total amount: $$ of donations
             result['actual_amount'] = num
@@ -792,6 +792,7 @@ def getAllApprovedProjects():
         for result in all_result:
             result['_id'] = str(result['_id'])
             approval = blockchainSetup.checkProjectApproval(result["approval_hash"])
+            print(approval)
             if approval: 
                 # check whether project met the target amount 
                 donations = list(db.donations.find({"project_id": ObjectId(result['_id'])}))
