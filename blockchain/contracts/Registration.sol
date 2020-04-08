@@ -8,6 +8,25 @@ contract Registration {
   mapping(address => Organization) public organizations;
   mapping(uint256 => Inspector) inspectorList;
   mapping(uint256 => address) public inspectorAddress; 
+  enum projectState { pending, approved, rejected }
+
+  struct CharityProject {
+    address projectOrganizationAdd;
+    uint256 beneficiaryGainedRatio;
+    projectState state; 
+    uint256 numOfDonationReceived; 
+    uint256 amountOfDonationReceived; 
+    uint256 amountOfDonationBeneficiaryReceived; 
+  }
+
+  mapping(int => CharityProject) public projectList; 
+    
+  int public numProjects; 
+    
+  event ApprovalProject(address inspector, int projectId);
+  event RejectProject(address inspector, int projectId);
+  event RegisterProject(address organizationAdd, int projectId);
+  event DistributeDonation(uint256 donationAmount, int projectId);
 
   struct Donor {
     uint256 id;
@@ -183,6 +202,41 @@ event OrganizationApproval(address organization, address inspector);
 
   function getInspectorAddress(uint256 inspectorId) public view returns(address){
     return inspectorAddress[inspectorId]; 
+  }
+
+  function registerProject(uint256 beneficiaryGainedRatio) public returns (int){
+    require(approvedOrganization(msg.sender), 'Only approved organisation can create project.');
+    CharityProject memory newProject = CharityProject(
+      msg.sender, 
+      beneficiaryGainedRatio,
+      projectState.pending, 
+      0,
+      0,
+      0
+    );
+    int newProjectId = numProjects++; 
+    projectList[newProjectId] = newProject; 
+        
+    emit RegisterProject(msg.sender, newProjectId);
+    return newProjectId; 
+  }
+    
+  function approveProject(int projectId) public onlyOwner{
+    require(
+      projectList[projectId].state == projectState.pending,
+      "Cannot deal with accepted or rejected projects"
+    );
+    projectList[projectId].state = projectState.approved;
+    emit ApprovalProject(msg.sender, projectId);
+  }
+    
+  function rejectProject(int projectId) public onlyOwner{
+    require(
+      projectList[projectId].state == projectState.pending,
+      "Cannot deal with accepted or rejected projects"
+    );
+    projectList[projectId].state = projectState.rejected;
+    emit RejectProject(msg.sender, projectId);
   }
 
 }
