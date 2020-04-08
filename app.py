@@ -3,10 +3,10 @@ from flask_cors import CORS
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import blockchainSetup
+import datetime
 from blockchainSetup import  web3
 from pymongo.errors import ConnectionFailure
 from bson.json_util import dumps
-from datetime import datetime
 import os
 import pandas as pd
 from pathlib import Path
@@ -36,21 +36,33 @@ def testGet():
 @app.route("/makeDonation", methods=['POST'])
 def donate():
     try:
-        charity = request.args.get("charityAddress")
-        amount = request.args.get("amount")
-        pid = request.args.get("projectId")
-        donor = request.args.get("donorAddress")
-        txn = blockchainSetup.make_donation(charity, amount, pid,donor)
+        amount = request.form.get("amount")
+        print(amount)
+        pid = request.form.get("project_id")
+        print(pid)
+        donor = request.form.get("donor_id")
+        print(donor)
+        result = db.donors.find_one({"_id": ObjectId(donor)})
+        print(result['eth_address'])
+        result1 = db.projects.find_one({"_id": ObjectId(pid)})
+
+        txn = "txn"
+        # txn = blockchainSetup.make_donation(int(amount), int(result1['project_solidity_id']), result['eth_address'])
+        print(txn)
         new_donation = {
-            "amount": request.form.get("amount"),
-            "project_id": request.form.get("project_id"),
-            "donor_address": request.form.get("donor_address"),
-            "donation_time": request.form.get("donation_time"),
+            "amount": amount,
+            "project_id": ObjectId(pid),
+            "donor_id": ObjectId(donor),
+            "donation_time": str(datetime.datetime.now().strftime("%Y-%m-%d")),
             "donation_hash": txn,
             "confirmed_hash": ''
         }
 
+
         donation_id = db.donations.insert_one(new_donation)
+        print(str(donation_id))
+        print(donation_id)
+        return jsonify(200)
     
     except Exception as ex:
         print(ex)
@@ -59,8 +71,7 @@ def donate():
             {"error": str(ex)}
         )
 
-    print(donation_id)
-    return jsonify(200)
+
 
 
 @app.route("/registerInspector", methods=['POST'])
@@ -546,23 +557,45 @@ def getCharityDetails():
             })    
 
 
-@app.route("/confirmReceiveMoney", methods=['POST'])
-def confirmReceiveMoney():
-    donations = db.donations
-    donation = request.args.get("donationId")
-    inspector = request.args.get("inspectorAddress")
+
+
+@app.route("/confirmMoney", methods=['POST'])
+def confirmMoney():
+
+    amount = request.form.get("amount")
+    project_id = request.form.get("project_id")
+    description = request.form.get("description")
     try:
-        txn = blockchainSetup.confirmReceiveMoney(donation, inspector)
-        result = donations.find_one_and_update(
-            {"_id": ObjectId(request.form.get("id"))},
-            {"$set":{
-                "comfirmed_hash": txn
-            }
-            }
-        )
+        # txn = blockchainSetup.confirmDonation(amount,project_id)
+        new_confirmation = {
+            "amount": amount,
+            "project_id": ObjectId(project_id),
+            "description": description,
+            "confirmation_time": str(datetime.datetime.now().strftime("%Y-%m-%d")),
+            "confirmation_hash": ''
+        }
+
+        confirmation_id = db.confirmations.insert_one(new_confirmation)
         return jsonify(200)
     except Exception as ex:
         return jsonify({"error":str(ex)})
+
+@app.route("/retrieveConfirmation", methods=['GET'])
+def retrieveConfirmation():
+
+    # try:
+    project_id = request.args.get("project_id")
+    result = list(db.confirmations.find({"project_id":ObjectId(project_id)}))
+    num = 0
+    for i in result:
+        i['_id'] = str(i['_id'])
+        i['project_id'] = str(i['project_id'])
+        num += int(i['amount'])
+
+    result1={'confirmations':result,'total_confirmation':num}
+    return jsonify({"code": 200, "result": result1})
+    # except Exception as ex:
+    #     return jsonify({"code": 400, "message": str(ex)})
 
 def get_byte_image(image_path):
     img = Image.open(image_path, mode='r')
@@ -576,6 +609,7 @@ def retrieveProjectDetails():
 
     try:
         result = db.projects.find_one({"_id":ObjectId(request.args.get("id"))})
+        print(result)
         result['_id'] = str(result['_id'])
         image_path = './projectCover/'+ result['_id'] + '/cover.jpg'
         print(image_path)
@@ -584,17 +618,27 @@ def retrieveProjectDetails():
         result['charity_id'] = str(result['charity_id'])
         charity = db.charities.find_one({"_id":ObjectId(result['charity_id'])})
         result['charity_name'] = charity['name']
+        print(result)
+        # approval = blockchainSetup.checkProjectApproval(result['approval_hash'])
+        # if(approval):
+        #     return jsonify(result)
+        # else:
+        #     return jsonify({"code": 400, "error": "This Project is still waiting for approval!"})
         result['charity_description'] = charity['description']
         result['charity_number'] = charity['contact_number']
         result['charity_email'] = charity['email']
         result['charity_address'] = charity['physical_address']
         donations = list(db.donations.find({"project_id": ObjectId(result['_id'])}))
+        print(result)
         num = 0
         for d in donations:
-            num += d['amount']
-        print(num)
+            num += int(d['amount'])
+        # print(num)
         result['actual_amount'] = num
+        result['fundTarget'] = int(result['fundTarget'])
+        print(result)
         return jsonify({'code': 200, "result": result})
+
 
     except Exception as ex:
         return jsonify({"code": 400, "message":str(ex)})
@@ -636,7 +680,7 @@ def registerProject():
                 "projectName": request.form.get('projectName'),
                 "projectCategory": request.form.get('projectCategory'),
                 "project_solidity_id": numProjects, 
-                "charity_id": request.form.get('charity_id'),
+                "charity_id": ObjectId(request.form.get('charity_id')),
                 "charityAddress": charity,
                 "beneficiaryList": beneficiaryList, 
                 "breakdownList": request.form.get('breakdownList'), 
@@ -736,6 +780,7 @@ def getAllPendingProjects():
         )
         for result in all_result:
             result['_id'] = str(result['_id'])
+            result['charity_id'] = str(result['charity_id'])
             result_list.append(result)
 
         return jsonify(
@@ -875,18 +920,21 @@ def retrieveAllProjects():
 
     try:
         result = list(projects.find({"approval_hash": { "$ne": ""}}))
+        print(result)
+        print(type(result))
         for i in result:
-            approval = blockchainSetup.checkProjectApproval(i["approval_hash"])
-            if approval: 
-                i['_id'] = str(i['_id'])
-                i['charity_id'] = str(i['charity_id'])
-                num = 0
-                donations = list(db.donations.find({"project_id": ObjectId(i['_id'])}))
-                for d in donations:
-                    num += d['amount']
-                i['actual_amount'] = num
-                print(i)
-
+            i['_id'] = str(i['_id'])
+            i['charity_id'] = str(i['charity_id'])
+            i['fundTarget'] = int(i['fundTarget'])
+            # i['beneficiaryListId'] = str(i['beneficiaryListId'])
+            # i['documentationId'] = str(i['documentationId'])
+            num = 0
+            donations = list(db.donations.find({"project_id": ObjectId(i['_id'])}))
+            for d in donations:
+                num += int(d['amount'])
+            i['actual_amount'] = num
+            print(i)
+        print(result)
         return jsonify({"code":200, "result": result})
     except Exception as ex:
         return jsonify({"code":400, "message":str(ex)})
@@ -896,11 +944,15 @@ def retrieveDonorsByProject():
     try:
         project = db.projects.find_one({"_id":ObjectId(request.args.get("id"))})
         project['_id'] = str(project['_id'])
+        print(project['_id'])
         donations = list(db.donations.find({"project_id": ObjectId(project['_id'])}))
+        print(donations)
         for i in donations:
-            donor = db.donors.find_one({"eth_address": i['donor_address']})
+            donor = db.donors.find_one({"_id": i['donor_id']})
+            print(donor)
             i['_id'] = str(i['_id'])
             i['project_id'] = str(i['project_id'])
+            i['donor_id'] = str(i['donor_id'])
             i['donor'] = donor['username']
 
         latestDonors = list(reversed(list(donations)))[0:10]
@@ -915,9 +967,9 @@ def loginDonor():
     try:
         results = donors.find_one({"username": request.args.get("username")})
         print(results)
-        print(":::")
+        # print(":::")
         if ( len(results) and results["password"] == request.args.get("password")):
-            approval = blockchainSetup.checkDonorApproval(results["approval_hash"])
+            approval = blockchainSetup.checkDonorApproval(results["approval_hash"],results["eth_address"])
             if(approval):
                 return jsonify(
                     {   
@@ -934,12 +986,11 @@ def loginDonor():
             return jsonify({"code":400, "message": "username or password not correct"})
 
     except Exception as ex:
-        # print(ex)
-        # print(type(ex))
+        print(ex)
+        print(type(ex))
         return jsonify(
             {"error": "username or password not correct"}
         )
-
 
 @app.route("/charity/login", methods=['GET'])
 def loginCharity():
@@ -1020,7 +1071,8 @@ def dummyData():
                 "description": "A good charity Project balah balah balah balah balah balah balah balah",
                 "registration_hash": "yeah",
                 "approval_hash": 'yes',
-                "reject_hash": 'oh'
+                "reject_hash": 'oh',
+                'project_solidity_id':p
             }
             project_id = db.projects.insert_one(new_project)
 

@@ -35,9 +35,8 @@ abi = info_json["abi"]
 donationContractAddress = '0x674665f533b13eC9b0CAD7c5B372Aa1E93C56670'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
-
-def make_donation(charity, amount, pid, donor):
-    txn = donationContract.functions.makeDonation(charity, amount, pid)
+def make_donation(amount, pid, donor):
+    txn = donationContract.functions.makeDonation(amount, pid)
     txn = txn.transact({'from': donor})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     print(receipt)
@@ -168,15 +167,28 @@ def stopProject(inspector, projectId):
     receipt = web3.eth.waitForTransactionReceipt(txn)
     return receipt.transactionHash.hex()
 
-def checkDonorApproval(txn_hash):
+# def checkDonorApproval(txn_hash):
+#     try:
+#         receipt = web3.eth.getTransactionReceipt(txn_hash)
+#         logs = registrationContract.events.DonorApproval().processReceipt(receipt)
+#         return True
+#     except Exception as ex:
+#         print(ex)
+#         return False
+
+def checkDonorApproval(txn_hash,donor):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
         logs = registrationContract.events.DonorApproval().processReceipt(receipt)
-        return True
+        print(logs)
+        if(logs[0]['args']['donor']==donor):
+            print(logs[0]['args']['donor'])
+            return True
+        return False
     except Exception as ex:
         print(ex)
         return False
-
+        
 def checkCharityApproval(txn_hash):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
