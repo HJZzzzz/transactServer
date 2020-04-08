@@ -950,7 +950,6 @@ def loginDonor():
     try:
         results = donors.find_one({"username": request.args.get("username")})
         print(results)
-        # print(":::")
         if ( len(results) and results["password"] == request.args.get("password")):
             approval = blockchainSetup.checkDonorApproval(results["approval_hash"],results["eth_address"])
             if(approval):

@@ -189,11 +189,13 @@ def checkDonorApproval(txn_hash,donor):
         print(ex)
         return False
         
-def checkCharityApproval(txn_hash):
+def checkCharityApproval(txn_hash, charity):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
         logs = registrationContract.events.OrganizationApproval().processReceipt(receipt)
-        return True
+        if(logs[0]['args']['organization']==charity):
+            return True
+        return False
     except Exception as ex:
         print(ex)
         return False
