@@ -37,13 +37,9 @@ def testGet():
 def donate():
     try:
         amount = request.form.get("amount")
-        print(amount)
         pid = request.form.get("project_id")
-        print(pid)
         donor = request.form.get("donor_id")
-        print(donor)
         result = db.donors.find_one({"_id": ObjectId(donor)})
-        print(result['eth_address'])
         result1 = db.projects.find_one({"_id": ObjectId(pid)})
 
         txn = "txn"
@@ -53,15 +49,13 @@ def donate():
             "amount": amount,
             "project_id": ObjectId(pid),
             "donor_id": ObjectId(donor),
+            "donor_address": request.form.get("donor_address"),
             "donation_time": str(datetime.datetime.now().strftime("%Y-%m-%d")),
             "donation_hash": txn,
             "confirmed_hash": ''
         }
 
-
         donation_id = db.donations.insert_one(new_donation)
-        print(str(donation_id))
-        print(donation_id)
         return jsonify(200)
     
     except Exception as ex:
@@ -99,7 +93,7 @@ def registerDonor():
             "eth_address": request.form.get("eth_address"),
             "bank_account": request.form.get("bank_account"),
             "physical_address": request.form.get("physical_address"),
-            "full_name": request.form.get("full_name"),
+            "name": request.form.get("full_name"),
             "contact_number": request.form.get("contact_number"),
             "financial_info": request.form.get("financial_info"),
             "registration_hash": txn,
@@ -310,6 +304,7 @@ def getProjectsByOrganization():
             result['actual_amount'] = num
             result['num_donors'] = numDonors
             result['_id'] = str(result['_id'])
+            result['charity_id'] = str(result['charity_id'])
             result_list.append(result)
         dic = {"code":200, "items":result_list}    
         return jsonify(dic)
@@ -326,26 +321,25 @@ def getProjectsByDonor():
     print(donor)
     try: 
         donation_result = db.donations.find({"donor_address":donor})
+        unique_projects = list(set([ str(result["project_id"]) for result in donation_result]))
+
         result_list = []
-        for result in donation_result:
-            project = db.projects.find_one({"_id":ObjectId(result['project_id'])})
-            donations = list(db.donations.find({"project_id": ObjectId(project['_id'])}))
-            result['_id'] = str(result['_id'])
-            result['project_id'] = str(project['_id'])
-            project['_id'] = str(project['_id'])
+        for project_id in unique_projects:
+            project = db.projects.find_one({"_id":ObjectId(project_id)})
+            donations = list(db.donations.find({"project_id": ObjectId(project_id)}))
+            result = {}
+            result['_id'] = project_id
+
             num = 0
             for d in donations:
-                num += d['amount']
-            print(num)
+                num += int(d['amount'])
             # total amount: $$ of donations
             result['actual_amount'] = num
-            result['project_name'] = project['project_name']
-            # result['expire_date'] = project['expire_date']
-            result['target_amount'] = project['target_amount']
-            print(result)
-            result_list.append(result)
-            #donated amount
-            #timestamp
+            result['projectName'] = project['projectName']
+            result['expirationDate'] = project['expirationDate']
+            result['fundTarget'] = project['fundTarget']
+
+            result_list.append(result)  
         dic = {"code":200, "items":result_list}    
         return jsonify(dic)
         
@@ -611,16 +605,17 @@ def retrieveProjectDetails():
 
     try:
         result = db.projects.find_one({"_id":ObjectId(request.args.get("id"))})
-        print(result)
+
         result['_id'] = str(result['_id'])
         image_path = './projectCover/'+ result['_id'] + '/cover.jpg'
         print(image_path)
         image = get_byte_image(image_path)
         result["image"] = image
+        
         result['charity_id'] = str(result['charity_id'])
         charity = db.charities.find_one({"_id":ObjectId(result['charity_id'])})
         result['charity_name'] = charity['name']
-        print(result)
+
         # approval = blockchainSetup.checkProjectApproval(result['approval_hash'])
         # if(approval):
         #     return jsonify(result)
@@ -631,26 +626,17 @@ def retrieveProjectDetails():
         result['charity_email'] = charity['email']
         result['charity_address'] = charity['physical_address']
         donations = list(db.donations.find({"project_id": ObjectId(result['_id'])}))
-        print(result)
+
         num = 0
         for d in donations:
             num += int(d['amount'])
         # print(num)
         result['actual_amount'] = num
         result['fundTarget'] = int(result['fundTarget'])
-        print(result)
+
         return jsonify({'code': 200, "result": result})
-
-
     except Exception as ex:
         return jsonify({"code": 400, "message":str(ex)})
-
-@app.route("/testImage", methods=["POST"])
-def testImageUpload():
-    file = request.files["projectCover"]
-    filename =  file.filename
-    file.save(os.path.join("./images", filename))
-    return jsonify({"code": 200})
 
 @app.route("/registerProject", methods=['POST'])
 def registerProject():
@@ -862,26 +848,23 @@ def rejectProject():
 
 @app.route("/retrieveAllProjects", methods=['GET'])
 def retrieveAllProjects():
-
     projects = db.projects
-
     try:
         result = list(projects.find({"approval_hash": { "$ne": ""}}))
-        print(result)
-        print(type(result))
         for i in result:
             i['_id'] = str(i['_id'])
             i['charity_id'] = str(i['charity_id'])
             i['fundTarget'] = int(i['fundTarget'])
-            # i['beneficiaryListId'] = str(i['beneficiaryListId'])
-            # i['documentationId'] = str(i['documentationId'])
+            image_path = './projectCover/'+ i['_id'] + '/cover.jpg'
+            print(image_path)
+            image = get_byte_image(image_path)
+            i["image"] = image
+
             num = 0
             donations = list(db.donations.find({"project_id": ObjectId(i['_id'])}))
             for d in donations:
                 num += int(d['amount'])
             i['actual_amount'] = num
-            print(i)
-        print(result)
         return jsonify({"code":200, "result": result})
     except Exception as ex:
         return jsonify({"code":400, "message":str(ex)})
@@ -947,8 +930,7 @@ def loginCharity():
         print("username", request.args.get("username"))
         results = charities.find_one({"username": request.args.get("username")})
         if ( len(results) and results["password"] == request.args.get("password")):
-            # approval = blockchainSetup.checkCharityApproval(results["approval_hash"])
-            approval = True
+            approval = blockchainSetup.checkCharityApproval(results["approval_hash"],results["eth_address"])
             if approval:
                 return jsonify(
                     {
