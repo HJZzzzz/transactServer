@@ -7,7 +7,6 @@ import datetime
 from blockchainSetup import  web3
 from pymongo.errors import ConnectionFailure
 from bson.json_util import dumps
-from datetime import datetime
 import os
 import pandas as pd
 from pathlib import Path
@@ -612,17 +611,16 @@ def retrieveProjectDetails():
 
     try:
         result = db.projects.find_one({"_id":ObjectId(request.args.get("id"))})
+        print(result)
         result['_id'] = str(result['_id'])
         image_path = './projectCover/'+ result['_id'] + '/cover.jpg'
         print(image_path)
         image = get_byte_image(image_path)
         result["image"] = image
         result['charity_id'] = str(result['charity_id'])
-        result['beneficiaryListId'] = str(result['beneficiaryListId'])
-        result['documentationId'] = str(result['documentationId'])
         charity = db.charities.find_one({"_id":ObjectId(result['charity_id'])})
         result['charity_name'] = charity['name']
-
+        print(result)
         # approval = blockchainSetup.checkProjectApproval(result['approval_hash'])
         # if(approval):
         #     return jsonify(result)
@@ -633,15 +631,14 @@ def retrieveProjectDetails():
         result['charity_email'] = charity['email']
         result['charity_address'] = charity['physical_address']
         donations = list(db.donations.find({"project_id": ObjectId(result['_id'])}))
-        # print(result['_id'])
-        # print(ObjectId(result['_id']))
-        # print(donations)
+        print(result)
         num = 0
         for d in donations:
             num += int(d['amount'])
         # print(num)
         result['actual_amount'] = num
-        result['target_amount'] = int(result['target_amount'])
+        result['fundTarget'] = int(result['fundTarget'])
+        print(result)
         return jsonify({'code': 200, "result": result})
 
 
@@ -683,7 +680,7 @@ def registerProject():
                 "projectName": request.form.get('projectName'),
                 "projectCategory": request.form.get('projectCategory'),
                 "project_solidity_id": numProjects, 
-                "charity_id": request.form.get('charity_id'),
+                "charity_id": ObjectId(request.form.get('charity_id')),
                 "charityAddress": charity,
                 "beneficiaryList": beneficiaryList, 
                 "breakdownList": request.form.get('breakdownList'), 
@@ -716,6 +713,7 @@ def registerProject():
         else:
             beneficiaryList = []
             if "beneficiaryList" in request.files:
+                beneficiaryListFile = request.files["beneficiaryList"]
                 df = pd.read_excel(beneficiaryListFile)
                 if list(df.columns) != ["beneficiary", "remark"]:
                     return jsonify({"code": 400, "message":"Invalid beneficiary file format."})        
@@ -783,6 +781,7 @@ def getAllPendingProjects():
         )
         for result in all_result:
             result['_id'] = str(result['_id'])
+            result['charity_id'] = str(result['charity_id'])
             result_list.append(result)
 
         return jsonify(
@@ -873,8 +872,9 @@ def retrieveAllProjects():
         for i in result:
             i['_id'] = str(i['_id'])
             i['charity_id'] = str(i['charity_id'])
-            i['beneficiaryListId'] = str(i['beneficiaryListId'])
-            i['documentationId'] = str(i['documentationId'])
+            i['fundTarget'] = int(i['fundTarget'])
+            # i['beneficiaryListId'] = str(i['beneficiaryListId'])
+            # i['documentationId'] = str(i['documentationId'])
             num = 0
             donations = list(db.donations.find({"project_id": ObjectId(i['_id'])}))
             for d in donations:
@@ -916,7 +916,7 @@ def loginDonor():
         print(results)
         # print(":::")
         if ( len(results) and results["password"] == request.args.get("password")):
-            approval = blockchainSetup.checkDonorApproval(results["approval_hash"])
+            approval = blockchainSetup.checkDonorApproval(results["approval_hash"],results["eth_address"])
             if(approval):
                 return jsonify(
                     {   
@@ -933,8 +933,8 @@ def loginDonor():
             return jsonify({"code":400, "message": "username or password not correct"})
 
     except Exception as ex:
-        # print(ex)
-        # print(type(ex))
+        print(ex)
+        print(type(ex))
         return jsonify(
             {"error": "username or password not correct"}
         )

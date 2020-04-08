@@ -20,7 +20,7 @@ abi = info_json["abi"]
 
 inspectorAddress = web3.eth.accounts[0]
 
-projectContractAddress = '0xAdBa0394368eDccB3f2763E35A3122b7427a8d94'
+projectContractAddress = '0xaa43ebE46bDeAEc767bE0ed08f98d391b9698DD1'
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
 with open("./blockchain/build/contracts/Registration.json") as regist:
@@ -28,7 +28,7 @@ with open("./blockchain/build/contracts/Registration.json") as regist:
 abi = info_json["abi"]
 
 
-registrationContractAddress = '0x92943CE889f4036F6D94238E659B74d2F64681aC'
+registrationContractAddress = '0x3CBDDcAb63e0798d22B6D3C8ED2a0d9EF3f46D58'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -37,7 +37,7 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
 abi = info_json["abi"]
 
 
-donationContractAddress = '0x1D31b16263435c2Ff0e29CA78da88166A65AB06C'
+donationContractAddress = '0x6028134fF75a9b7cec3C9f6F4D02085be4752a7d'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
 
@@ -182,6 +182,7 @@ def checkDonorApproval(txn_hash,donor):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
         logs = registrationContract.events.DonorApproval().processReceipt(receipt)
+        print(logs)
         if(logs[0]['args']['donor']==donor):
             print(logs[0]['args']['donor'])
             return True
