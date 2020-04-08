@@ -249,4 +249,16 @@ event OrganizationApproval(address organization, address inspector);
     emit StopProject(msg.sender, projectId);
   }
 
+  function getOrganizationAddByProjectId(int projectId) public view returns(address){
+        return projectList[projectId].projectOrganizationAdd;
+  }
+
+  function distributeDonation(uint256 donationAmount, int projectId) public{
+    projectList[projectId].numOfDonationReceived = projectList[projectId].numOfDonationReceived + 1;
+    projectList[projectId].amountOfDonationReceived += donationAmount;
+    projectList[projectId].amountOfDonationBeneficiaryReceived += donationAmount * projectList[projectId].beneficiaryGainedRatio;
+
+    emit DistributeDonation(donationAmount, projectId);
+  }
+
 }
