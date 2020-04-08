@@ -11,24 +11,20 @@ from eth_typing import (
 web3 = Web3(Web3.HTTPProvider("http://localhost:8545"))
 accounts = web3.eth.accounts
 
+inspectorAddress = "0x34d5A773cbb46DfFd9766A95d22Be6d72FC47420"
 
 with open("./blockchain/build/contracts/Project.json") as project:
     info_json = json.load(project)
 abi = info_json["abi"]
 
-
-
-inspectorAddress = web3.eth.accounts[0]
-
-projectContractAddress = '0xaa43ebE46bDeAEc767bE0ed08f98d391b9698DD1'
+projectContractAddress = '0x34d5A773cbb46DfFd9766A95d22Be6d72FC47420'
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
 with open("./blockchain/build/contracts/Registration.json") as regist:
     info_json = json.load(regist)
 abi = info_json["abi"]
 
-
-registrationContractAddress = '0x3CBDDcAb63e0798d22B6D3C8ED2a0d9EF3f46D58'
+registrationContractAddress = '0x34d5A773cbb46DfFd9766A95d22Be6d72FC47420'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -36,10 +32,8 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
     info_json = json.load(donation)
 abi = info_json["abi"]
 
-
-donationContractAddress = '0x6028134fF75a9b7cec3C9f6F4D02085be4752a7d'
+donationContractAddress = '0x674665f533b13eC9b0CAD7c5B372Aa1E93C56670'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
-
 
 def make_donation(amount, pid, donor):
     txn = donationContract.functions.makeDonation(amount, pid)
@@ -148,10 +142,10 @@ def confirmReceiveMoney(donation, charity):
 
 
 def registerProject(charity, beneficiaryGainedRatio):
-    numProjects = projectContract.functions.numProjects().call()
+    numProjects = registrationContract.functions.numProjects().call()
     txn = registrationContract.functions.registerProject(beneficiaryGainedRatio).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    return receipt.transactionHash.hex(), numProjects 
+    return receipt.transactionHash.hex(), numProjects
 
 
 def approveProject(inspector, projectId):
@@ -167,6 +161,11 @@ def rejectProject(inspector, projectId):
     receipt = web3.eth.waitForTransactionReceipt(txn)
     return receipt.transactionHash.hex()
 
+def stopProject(inspector, projectId):
+    int_id = int(projectId)
+    txn = registrationContract.functions.stopProject(int_id).transact({'from': inspector})
+    receipt = web3.eth.waitForTransactionReceipt(txn)
+    return receipt.transactionHash.hex()
 
 # def checkDonorApproval(txn_hash):
 #     try:
@@ -176,7 +175,6 @@ def rejectProject(inspector, projectId):
 #     except Exception as ex:
 #         print(ex)
 #         return False
-
 
 def checkDonorApproval(txn_hash,donor):
     try:
@@ -190,24 +188,24 @@ def checkDonorApproval(txn_hash,donor):
     except Exception as ex:
         print(ex)
         return False
-
-
-def checkProjectApproval(txn_hash,project):
-    try:
-        receipt = web3.eth.getTransactionReceipt(txn_hash)
-        logs = registrationContract.events.ApprovalProject().processReceipt(receipt)
-        if (logs[0]['args']['project'] == project):
-            return True
-        return False
-    except Exception as ex:
-        print(ex)
-        return False
-
+        
 def checkCharityApproval(txn_hash):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
         logs = registrationContract.events.OrganizationApproval().processReceipt(receipt)
         return True
+    except Exception as ex:
+        print(ex)
+        return False
+
+def checkProjectApproval(txn_hash):
+    try:
+        receipt = web3.eth.getTransactionReceipt(txn_hash)
+        logs = registrationContract.events.ApprovalProject().processReceipt(receipt)
+        if(logs != null):
+            return True
+        else:
+            return False 
     except Exception as ex:
         print(ex)
         return False
