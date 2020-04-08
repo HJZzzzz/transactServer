@@ -15,12 +15,12 @@ contract Donation is ERC721 {
         projectContract = projectAddress;
     }
 
-    mapping(uint256 => Donation) public donations;
+    mapping(uint256 => donation) public donations;
 
     event madeDonation(address donor, address charityOrg, uint amount);
     event DonationConfirmed(uint donationId);
 
-    struct Donation {
+    struct donation {
         uint id;
         uint amount;
         address from;
@@ -33,7 +33,6 @@ contract Donation is ERC721 {
 
     //to transfer to projectIdOwner
     function makeDonation(uint _amount, uint256 _projectId) public {
-        uint256 _donationId = numDonations++;
         // Check that the donor did not already exist:
         require(registrationContract.approvedDonor(msg.sender), 'Only approved donor can make registration.');
         address _charityAdd = projectContract.getOrganizationAddByProjectId(_projectId);
@@ -41,7 +40,8 @@ contract Donation is ERC721 {
         require( uint(projectContract.checkProjectStatus(_projectId)) == 1 , 'Can only make donation to approved project.');
         // Donation storage donation = donations[_donationId];
         // super._mint(msg.sender,_donationId);
-        donations[_donationId] = Donation({
+        uint256 _donationId = numDonations++;
+        donations[_donationId] = donation({
             id:_donationId,
             amount: _amount,
             from: msg.sender,

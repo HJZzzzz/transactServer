@@ -38,7 +38,7 @@ contract Project {
     event RegisterProject(address organizationAdd, uint256 projectId);
     event DistributeDonation(uint256 donationAmount, uint256 projectId);
 
-    function registerProject(address organizationAdd, uint256 beneficiaryGainedRatio) public payable returns (uint256){
+    function registerProject(address organizationAdd, uint256 beneficiaryGainedRatio) public returns (uint256){
         require(registrationContract.approvedOrganization(msg.sender), 'Only approved organisation can create project.');
         CharityProject memory newProject = CharityProject(
             organizationAdd, 
@@ -107,7 +107,7 @@ contract Project {
     function distributeDonation(uint256 donationAmount, uint256 projectId) public{
         projectList[projectId].numOfDonationReceived = projectList[projectId].numOfDonationReceived + 1;
         projectList[projectId].amountOfDonationReceived += donationAmount;
-        projectList[projectId].amountOfDonationBeneficiaryReceived += donationAmount * projectList[projectId].beneficiaryGainedRatio;
+        projectList[projectId].amountOfDonationBeneficiaryReceived += donationAmount * projectList[projectId].beneficiaryGainedRatio / 100;
 
         emit DistributeDonation(donationAmount, projectId);
     }

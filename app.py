@@ -38,8 +38,7 @@ def donate():
     print(result['eth_address'])
     result1 = db.projects.find_one({"_id": ObjectId(pid)})
 
-    txn = "txn"
-    # txn = blockchainSetup.make_donation(int(amount), int(result1['project_solidity_id']), result['eth_address'])
+    txn = blockchainSetup.make_donation(int(amount), int(result1['project_solidity_id']), result['eth_address'])
     print(txn)
     new_donation = {
         "amount": amount,
@@ -660,23 +659,23 @@ def approveProject():
     inspector = request.form.get('inspectorAddress')
     print(project_solidity_id)
     print(inspector)
-    # try:
-    txn = blockchainSetup.approveProject(inspector, int(project_solidity_id))
-    result = projects.find_one_and_update(
-        {"project_solidity_id": project_solidity_id},
-        {"$set":{
-            "approval_hash":txn
-        }
-        }
-    )
-    dic = {"txn": txn}
-    return jsonify({
-        "code": 200,
-        "message": 'Project has been approved'})
-    # except Exception as ex:
-    #     return jsonify({
-    #         "code": 400,
-    #         "message":str(ex)})
+    try:
+        txn = blockchainSetup.approveProject(inspector, int(project_solidity_id))
+        result = projects.find_one_and_update(
+            {"project_solidity_id": project_solidity_id},
+            {"$set":{
+                "approval_hash":txn
+            }
+            }
+        )
+        dic = {"txn": txn}
+        return jsonify({
+            "code": 200,
+            "message": 'Project has been approved'})
+    except Exception as ex:
+        return jsonify({
+            "code": 400,
+            "message":str(ex)})
 
 @app.route("/rejectProject", methods=['POST'])
 def rejectProject():
