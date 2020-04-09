@@ -11,20 +11,20 @@ from eth_typing import (
 web3 = Web3(Web3.HTTPProvider("http://localhost:8545"))
 accounts = web3.eth.accounts
 
-inspectorAddress = "0x7f8C9ffFeBb71f205c84e4cdb23A209BF0DD7659"
+inspectorAddress = web3.eth.accounts[0]
 
 with open("./blockchain/build/contracts/Project.json") as project:
     info_json = json.load(project)
 abi = info_json["abi"]
 
-projectContractAddress = '0x7f8C9ffFeBb71f205c84e4cdb23A209BF0DD7659'
+projectContractAddress = '0x24274C51d79eE9a0337D8A17235635C1f0C6b9EB'
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
 with open("./blockchain/build/contracts/Registration.json") as regist:
     info_json = json.load(regist)
 abi = info_json["abi"]
 
-registrationContractAddress = '0x7f8C9ffFeBb71f205c84e4cdb23A209BF0DD7659'
+registrationContractAddress = '0x53884B9987EDd5574362ccfc0475BCA4f728138c'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -32,12 +32,17 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
     info_json = json.load(donation)
 abi = info_json["abi"]
 
-donationContractAddress = '0x674665f533b13eC9b0CAD7c5B372Aa1E93C56670'
+donationContractAddress = '0xa07EDF760A090a363A1B73122D47fD5f1212494F'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
 def make_donation(amount, pid, donor):
-    txn = donationContract.functions.makeDonation(amount, pid)
-    txn = txn.transact({'from': donor})
+    txn = donationContract.functions.makeDonation(amount, pid).transact({'from': donor})
+    receipt = web3.eth.waitForTransactionReceipt(txn)
+    print(receipt)
+    return receipt.transactionHash.hex()
+
+def confirmMoney(amount, pid, charity):
+    txn = donationContract.functions.confirmMoney(amount, pid).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     print(receipt)
     return receipt.transactionHash.hex()
@@ -213,4 +218,3 @@ def checkProjectApproval(txn_hash):
     except Exception as ex:
         print(ex)
         return False
-

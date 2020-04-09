@@ -256,9 +256,13 @@ event OrganizationApproval(address organization, address inspector);
   function distributeDonation(uint256 donationAmount, int projectId) public{
     projectList[projectId].numOfDonationReceived = projectList[projectId].numOfDonationReceived + 1;
     projectList[projectId].amountOfDonationReceived += donationAmount;
-    projectList[projectId].amountOfDonationBeneficiaryReceived += donationAmount * projectList[projectId].beneficiaryGainedRatio;
+    projectList[projectId].amountOfDonationBeneficiaryReceived += donationAmount * projectList[projectId].beneficiaryGainedRatio / 100;
 
     emit DistributeDonation(donationAmount, projectId);
+  }
+
+  function checkProjectStatus(int projectId) public view returns (projectState){
+        return projectList[projectId].state;
   }
 
 }

@@ -42,8 +42,7 @@ def donate():
         result = db.donors.find_one({"_id": ObjectId(donor)})
         result1 = db.projects.find_one({"_id": ObjectId(pid)})
 
-        txn = "txn"
-        # txn = blockchainSetup.make_donation(int(amount), int(result1['project_solidity_id']), result['eth_address'])
+        txn = blockchainSetup.make_donation(int(amount), int(result1['project_solidity_id']), result['eth_address'])
         print(txn)
         new_donation = {
             "amount": amount,
@@ -56,13 +55,14 @@ def donate():
         }
 
         donation_id = db.donations.insert_one(new_donation)
-        return jsonify(200)
+        return jsonify({'code': 200})
     
     except Exception as ex:
         print(ex)
         print(type(ex))
         return jsonify(
-            {"error": str(ex)}
+            {"code": 400,
+            "error": str(ex)}
         )
 
 
@@ -555,24 +555,28 @@ def getCharityDetails():
 
 @app.route("/confirmMoney", methods=['POST'])
 def confirmMoney():
-
-    amount = request.form.get("amount")
-    project_id = request.form.get("project_id")
-    description = request.form.get("description")
     try:
-        # txn = blockchainSetup.confirmDonation(amount,project_id)
+
+        amount = request.form.get("amount")
+        project_id = request.form.get("project_id")
+        description = request.form.get("description")
+        charity = request.form.get("charity_id")
+        result = db.charities.find_one({"_id": ObjectId(charity)})
+        result1 = db.projects.find_one({"_id": ObjectId(project_id)})
+
+        txn = blockchainSetup.confirmMoney(int(amount), int(result1['project_solidity_id']), result['eth_address'])
         new_confirmation = {
             "amount": amount,
             "project_id": ObjectId(project_id),
             "description": description,
             "confirmation_time": str(datetime.datetime.now().strftime("%Y-%m-%d")),
-            "confirmation_hash": ''
+            "confirmation_hash": txn
         }
 
         confirmation_id = db.confirmations.insert_one(new_confirmation)
-        return jsonify(200)
+        return jsonify({'code': 200})
     except Exception as ex:
-        return jsonify({"error":str(ex)})
+        return jsonify({"code": 400, "message":str(ex)})
 
 @app.route("/retrieveConfirmation", methods=['GET'])
 def retrieveConfirmation():
@@ -856,7 +860,6 @@ def approveProject():
 
     project_solidity_id = request.form.get('project_solidity_id')
     inspector = request.form.get('inspectorAddress')
-
     try:
         txn = blockchainSetup.approveProject(inspector, int(project_solidity_id))
         result = projects.find_one_and_update(

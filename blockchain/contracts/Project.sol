@@ -23,7 +23,7 @@ contract Project {
 
     mapping(uint256 => CharityProject) public projectList; 
     
-    uint256 public numProjects; 
+    uint256 public numProjects = 0; 
     
     event ApprovalProject(address inspector, uint256 projectId);
     event RejectProject(address inspector, uint256 projectId);
@@ -81,7 +81,7 @@ contract Project {
     function distributeDonation(uint256 donationAmount, uint256 projectId) public{
         projectList[projectId].numOfDonationReceived = projectList[projectId].numOfDonationReceived + 1;
         projectList[projectId].amountOfDonationReceived += donationAmount;
-        projectList[projectId].amountOfDonationBeneficiaryReceived += donationAmount * projectList[projectId].beneficiaryGainedRatio;
+        projectList[projectId].amountOfDonationBeneficiaryReceived += donationAmount * projectList[projectId].beneficiaryGainedRatio / 100;
 
         emit DistributeDonation(donationAmount, projectId);
     }
