@@ -10,16 +10,16 @@ contract Registration {
   mapping(uint256 => address) public inspectorAddress; 
   enum projectState { pending, approved, rejected, stopped }
 
-//   struct CharityProject {
-//     address projectOrganizationAdd;
-//     uint256 beneficiaryGainedRatio;
-//     projectState state; 
-//     uint256 numOfDonationReceived; 
-//     uint256 amountOfDonationReceived; 
-//     uint256 amountOfDonationBeneficiaryReceived; 
-//   }
+  struct CharityProject {
+    address projectOrganizationAdd;
+    uint256 beneficiaryGainedRatio;
+    projectState state; 
+    uint256 numOfDonationReceived; 
+    uint256 amountOfDonationReceived; 
+    uint256 amountOfDonationBeneficiaryReceived; 
+  }
 
-//   mapping(int => CharityProject) public projectList; 
+  mapping(int => CharityProject) public projectList; 
     
   int public numProjects; 
     
@@ -205,40 +205,40 @@ event OrganizationApproval(address organization, address inspector);
     return inspectorAddress[inspectorId]; 
   }
 
-//   function registerProject(uint256 beneficiaryGainedRatio) public returns (int){
-//     require(approvedOrganization(msg.sender), 'Only approved organisation can create project.');
-//     CharityProject memory newProject = CharityProject(
-//       msg.sender, 
-//       beneficiaryGainedRatio,
-//       projectState.pending, 
-//       0,
-//       0,
-//       0
-//     );
-//     int newProjectId = numProjects++; 
-//     projectList[newProjectId] = newProject; 
+  function registerProject(uint256 beneficiaryGainedRatio) public returns (int){
+    require(approvedOrganization(msg.sender), 'Only approved organisation can create project.');
+    CharityProject memory newProject = CharityProject(
+      msg.sender, 
+      beneficiaryGainedRatio,
+      projectState.pending, 
+      0,
+      0,
+      0
+    );
+    int newProjectId = numProjects++; 
+    projectList[newProjectId] = newProject; 
         
-//     emit RegisterProject(msg.sender, newProjectId);
-//     return newProjectId; 
-//   }
+    emit RegisterProject(msg.sender, newProjectId);
+    return newProjectId; 
+  }
     
-//   function approveProject(int projectId) public onlyOwner{
-//     require(
-//       projectList[projectId].state == projectState.pending,
-//       "Cannot deal with accepted or rejected projects"
-//     );
-//     projectList[projectId].state = projectState.approved;
-//     emit ApprovalProject(msg.sender, projectId);
-//   }
+  function approveProject(int projectId) public onlyOwner{
+    require(
+      projectList[projectId].state == projectState.pending,
+      "Cannot deal with accepted or rejected projects"
+    );
+    projectList[projectId].state = projectState.approved;
+    emit ApprovalProject(msg.sender, projectId);
+  }
     
-//   function rejectProject(int projectId) public onlyOwner{
-//     require(
-//       projectList[projectId].state == projectState.pending,
-//       "Cannot deal with accepted or rejected projects"
-//     );
-//     projectList[projectId].state = projectState.rejected;
-//     emit RejectProject(msg.sender, projectId);
-//   }
+  function rejectProject(int projectId) public onlyOwner{
+    require(
+      projectList[projectId].state == projectState.pending,
+      "Cannot deal with accepted or rejected projects"
+    );
+    projectList[projectId].state = projectState.rejected;
+    emit RejectProject(msg.sender, projectId);
+  }
 
   function stopProject(int projectId) public onlyOwner{
     require(
@@ -256,9 +256,13 @@ event OrganizationApproval(address organization, address inspector);
   function distributeDonation(uint256 donationAmount, int projectId) public{
     projectList[projectId].numOfDonationReceived = projectList[projectId].numOfDonationReceived + 1;
     projectList[projectId].amountOfDonationReceived += donationAmount;
-    projectList[projectId].amountOfDonationBeneficiaryReceived += donationAmount * projectList[projectId].beneficiaryGainedRatio;
+    projectList[projectId].amountOfDonationBeneficiaryReceived += donationAmount * projectList[projectId].beneficiaryGainedRatio / 100;
 
     emit DistributeDonation(donationAmount, projectId);
+  }
+
+  function checkProjectStatus(int projectId) public view returns (projectState){
+        return projectList[projectId].state;
   }
 
 }

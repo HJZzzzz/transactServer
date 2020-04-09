@@ -55,7 +55,7 @@ def donate():
         }
 
         donation_id = db.donations.insert_one(new_donation)
-        return jsonify({'code': 200, 'donation': donation_id})
+        return jsonify({'code': 200})
     
     except Exception as ex:
         print(ex)
@@ -560,18 +560,21 @@ def confirmMoney():
         amount = request.form.get("amount")
         project_id = request.form.get("project_id")
         description = request.form.get("description")
+        charity = request.form.get("charity_id")
+        result = db.charities.find_one({"_id": ObjectId(charity)})
+        result1 = db.projects.find_one({"_id": ObjectId(project_id)})
 
-        txn = blockchainSetup.confirmDonation(amount,project_id)
+        txn = blockchainSetup.confirmMoney(int(amount), int(result1['project_solidity_id']), result['eth_address'])
         new_confirmation = {
             "amount": amount,
             "project_id": ObjectId(project_id),
             "description": description,
-            "confirmation_time": str(datetime.now().strftime("%Y-%m-%d")),
+            "confirmation_time": str(datetime.datetime.now().strftime("%Y-%m-%d")),
             "confirmation_hash": txn
         }
 
         confirmation_id = db.confirmations.insert_one(new_confirmation)
-        return jsonify({'code': 200, 'confirmation': confirmation_id})
+        return jsonify({'code': 200})
     except Exception as ex:
         return jsonify({"code": 400, "message":str(ex)})
 
@@ -643,17 +646,17 @@ def registerProject():
 
     try:
         if  projectId == "0":
-            # beneficiaryListFile = request.files["beneficiaryList"]
-            # df = pd.read_excel(beneficiaryListFile)
-            # if list(df.columns) != ["beneficiary", "remark"]:
-            #     return jsonify({"code": 400, "message":"Invalid beneficiary file format."})
+            beneficiaryListFile = request.files["beneficiaryList"]
+            df = pd.read_excel(beneficiaryListFile)
+            if list(df.columns) != ["beneficiary", "remark"]:
+                return jsonify({"code": 400, "message":"Invalid beneficiary file format."})
 
-            # beneficiaryList = []
-            # for index, row in df.iterrows():
-            #     beneficiaryList.append({
-            #         "name": row["beneficiary"],
-            #         "remark": row["remark"]
-            #         })
+            beneficiaryList = []
+            for index, row in df.iterrows():
+                beneficiaryList.append({
+                    "name": row["beneficiary"],
+                    "remark": row["remark"]
+                    })
 
             #register to blockchain
             charity = request.form.get("charityAddress")
@@ -669,7 +672,7 @@ def registerProject():
                 "project_solidity_id": numProjects, 
                 "charity_id": ObjectId(request.form.get('charity_id')),
                 "charityAddress": charity,
-                #"beneficiaryList": beneficiaryList, 
+                "beneficiaryList": beneficiaryList, 
                 "breakdownList": request.form.get('breakdownList'), 
                 "expirationDate": request.form.get('expirationDate'), 
                 "fundTarget": request.form.get('fundTarget'),
@@ -679,19 +682,19 @@ def registerProject():
             }
             project_id = str(db.projects.insert_one(new_project).inserted_id)
 
-            # #store cover image
-            # projectCover = request.files["projectCover"]
-            # folder_path = "./projectCover/" + project_id + "/"
-            # Path(folder_path).mkdir(parents=True, exist_ok=True)
-            # filename = "cover.jpg"
-            # projectCover.save(os.path.join(folder_path, filename))
+            #store cover image
+            projectCover = request.files["projectCover"]
+            folder_path = "./projectCover/" + project_id + "/"
+            Path(folder_path).mkdir(parents=True, exist_ok=True)
+            filename = "cover.jpg"
+            projectCover.save(os.path.join(folder_path, filename))
 
-            # #store beneficiary file
-            # folder_path = "./beneficiary/" + project_id + "/"
-            # Path(folder_path).mkdir(parents=True, exist_ok=True)
-            # filename = "beneficiary.xlsx"
-            # #export df to excel
-            # df.to_excel(os.path.join(folder_path, filename), index=False)
+            #store beneficiary file
+            folder_path = "./beneficiary/" + project_id + "/"
+            Path(folder_path).mkdir(parents=True, exist_ok=True)
+            filename = "beneficiary.xlsx"
+            #export df to excel
+            df.to_excel(os.path.join(folder_path, filename), index=False)
     
             return jsonify({
                     "code": 200,
