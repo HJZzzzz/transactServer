@@ -20,7 +20,7 @@ abi = info_json["abi"]
 
 inspectorAddress = web3.eth.accounts[0]
 
-projectContractAddress = '0x172b6991A749eb653679b9d9c33Ae8cFcc00cb00'
+projectContractAddress = '0x8f3020DAdf681Bd0EC454264983B0bA34509EF25'
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
 with open("./blockchain/build/contracts/Registration.json") as regist:
@@ -28,7 +28,7 @@ with open("./blockchain/build/contracts/Registration.json") as regist:
 abi = info_json["abi"]
 
 
-registrationContractAddress = '0xa28b6A3c1Ad1c8577B70640a888CFb9ddafC3C8F'
+registrationContractAddress = '0xB01b115594c791e8234BA48F0ea3C4175DDB6258'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -37,7 +37,7 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
 abi = info_json["abi"]
 
 
-donationContractAddress = '0x32c0F1cC0983C7a6adF7a0e470C5069a3613fF4d'
+donationContractAddress = '0x8615a68AD0E974b94bd1D3772a709122457184bA'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
 
@@ -108,29 +108,25 @@ def registerOrganization(charity, name):
 
 def approveOrganization(charity, inspector):
     txn = registrationContract.functions.approveOrganization(charity).transact({'from': inspector})
-    receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
+    receipt = web3.eth.waitForTransactionReceipt(txn) 
     return receipt.transactionHash.hex()
 
 
 def rejectOrganization(charity, inspector):
     txn = registrationContract.functions.rejectOrganization(charity).transact({'from': inspector})
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
     return receipt.transactionHash.hex()
 
 
 def updateOrganization(charity, name):
     txn = registrationContract.functions.updateOrganization(charity, name).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
     return receipt.transactionHash.hex()
 
 
 def deleteOrganization(charity):
     txn = registrationContract.functions.deleteOrganization(charity).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
     return receipt.transactionHash.hex()
 
 
@@ -147,28 +143,26 @@ def getOrganizationName(charity):
 def confirmReceiveMoney(donation, charity):
     txn = donationContract.functions.confirmReceiveMoney(donation).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    print(receipt)
     return receipt.transactionHash.hex()
 
 
 def registerProject(charity, beneficiaryGainedRatio):
     numProjects = projectContract.functions.numProjects().call()
-    txn = projectContract.functions.registerProject(charity, beneficiaryGainedRatio).transact({'from': charity})
-
+    txn = projectContract.functions.registerProject(beneficiaryGainedRatio).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
-    return receipt.transactionHash.hex(), numProjects
+    return receipt.transactionHash.hex(), numProjects 
 
 
 def approveProject(inspector, projectId):
-    print(type(projectId))
-    txn = projectContract.functions.approveProject(projectId)({'from': inspector})
-    print(txn)
+    int_id = int(projectId)
+    txn = projectContract.functions.approveProject(int_id).transact({'from': inspector})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     return receipt.transactionHash.hex()
 
 
 def rejectProject(inspector, projectId):
-    txn = projectContract.functions.rejectProject(projectId)({'from': inspector})
+    int_id = int(projectId)
+    txn = projectContract.functions.rejectProject(int_id).transact({'from': inspector})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     return receipt.transactionHash.hex()
 
@@ -203,6 +197,15 @@ def checkProjectApproval(txn_hash,project):
         if (logs[0]['args']['project'] == project):
             return True
         return False
+    except Exception as ex:
+        print(ex)
+        return False
+
+def checkCharityApproval(txn_hash):
+    try:
+        receipt = web3.eth.getTransactionReceipt(txn_hash)
+        logs = registrationContract.events.OrganizationApproval().processReceipt(receipt)
+        return True
     except Exception as ex:
         print(ex)
         return False
