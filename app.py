@@ -787,12 +787,11 @@ def getAllApprovedProjects():
         all_result = db_result.find(
             {"approval_hash": { "$ne": ''}}
         )
-        
         # check whether project is approval  
         for result in all_result:
             result['_id'] = str(result['_id'])
             approval = blockchainSetup.checkProjectApproval(result["approval_hash"])
-            print(approval)
+
             if approval: 
                 # check whether project met the target amount 
                 donations = list(db.donations.find({"project_id": ObjectId(result['_id'])}))
@@ -804,6 +803,7 @@ def getAllApprovedProjects():
                 if num < int(result['fundTarget']):
                     result['actual_amount'] = num
                     result['numDonors'] = numDonors
+                    result['charity_id'] = str(result['charity_id'])
                     result_list.append(result)
         return jsonify(
             {"code": 200,
