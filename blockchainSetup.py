@@ -6,25 +6,25 @@ from eth_typing import (
     ChecksumAddress,
     HexStr,
 )
-
+import hashlib
 
 web3 = Web3(Web3.HTTPProvider("http://localhost:8545"))
 accounts = web3.eth.accounts
 
-inspectorAddress = "0x02465fACe24B468aF149EbFf19677A6b45291394"
+inspectorAddress = web3.eth.accounts[0]
 
 with open("./blockchain/build/contracts/Project.json") as project:
     info_json = json.load(project)
 abi = info_json["abi"]
 
-projectContractAddress = '0x02465fACe24B468aF149EbFf19677A6b45291394'
+projectContractAddress = '0xA4f6Da7d83E427aAa52b432C8D1ddE5eB823Fa27'
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
 with open("./blockchain/build/contracts/Registration.json") as regist:
     info_json = json.load(regist)
 abi = info_json["abi"]
 
-registrationContractAddress = '0x02465fACe24B468aF149EbFf19677A6b45291394'
+registrationContractAddress = '0x88e884fA870F014a5C466baf221e1204A6d65D1a'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -32,12 +32,19 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
     info_json = json.load(donation)
 abi = info_json["abi"]
 
-donationContractAddress = '0x02465fACe24B468aF149EbFf19677A6b45291394'
+donationContractAddress = '0x4aFE2CF6a4D44cCf016b2d9b7ffC8BCaF6A6596b'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
 def make_donation(amount, pid, donor):
-    txn = donationContract.functions.makeDonation(amount, pid)
-    txn = txn.transact({'from': donor})
+    # To protect user privacy, we will use sha256 to hash the donor' eth address
+    hash = encrypt_string(donor)
+    txn = donationContract.functions.makeDonation(amount, pid,hash).transact({'from': donor})
+    receipt = web3.eth.waitForTransactionReceipt(txn)
+    print(receipt)
+    return receipt.transactionHash.hex()
+
+def confirmMoney(amount, pid, charity):
+    txn = donationContract.functions.confirmMoney(amount, pid).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     print(receipt)
     return receipt.transactionHash.hex()
@@ -71,7 +78,8 @@ def registerDonor(address, name):
 
 
 def approveDonor(donor,inspector):
-    txn = registrationContract.functions.approveDonor(donor).transact({'from':inspector})
+    hash = encrypt_string(donor)
+    txn = registrationContract.functions.approveDonor(donor, hash).transact({'from':inspector})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     print(receipt)
     return receipt.transactionHash.hex()
@@ -98,14 +106,13 @@ def registerOrganization(charity, name):
     txn = registrationContract.functions.registerOrganization(charity, name).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     print(receipt)
-    logs = registrationContract.events.RegisterProject().processReceipt(receipt)
     return receipt.transactionHash.hex()
 
 
 def approveOrganization(charity, inspector):
     txn = registrationContract.functions.approveOrganization(charity).transact({'from': inspector})
     receipt = web3.eth.waitForTransactionReceipt(txn) 
-    logs = registrationContract.events.OrganizationApproval().processReceipt(receipt)
+    print(receipt.transactionHash.hex())
     return receipt.transactionHash.hex()
 
 
@@ -169,22 +176,14 @@ def stopProject(inspector, projectId):
     receipt = web3.eth.waitForTransactionReceipt(txn)
     return receipt.transactionHash.hex()
 
-# def checkDonorApproval(txn_hash):
-#     try:
-#         receipt = web3.eth.getTransactionReceipt(txn_hash)
-#         logs = registrationContract.events.DonorApproval().processReceipt(receipt)
-#         return True
-#     except Exception as ex:
-#         print(ex)
-#         return False
 
 def checkDonorApproval(txn_hash,donor):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
         logs = registrationContract.events.DonorApproval().processReceipt(receipt)
-        print(logs)
-        if(logs[0]['args']['donor']==donor):
-            print(logs[0]['args']['donor'])
+        # print(logs)
+        if(logs[0]['args']['donor']==encrypt_string(donor)):
+            # print(logs[0]['args']['donor'])
             return True
         return False
     except Exception as ex:
@@ -195,6 +194,7 @@ def checkCharityApproval(txn_hash, charity):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
         logs = registrationContract.events.OrganizationApproval().processReceipt(receipt)
+
         if(logs[0]['args']['organization']==charity):
             return True
         return False
@@ -202,15 +202,51 @@ def checkCharityApproval(txn_hash, charity):
         print(ex)
         return False
 
-def checkProjectApproval(txn_hash):
+def checkProjectApproval(txn_hash,project_solidity_id):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
+
         logs = registrationContract.events.ApprovalProject().processReceipt(receipt)
-        if(logs != null):
+        print(logs)
+        if(logs [0]['args']['projectId']== project_solidity_id):
             return True
         else:
-            return False 
+            return False
     except Exception as ex:
         print(ex)
         return False
 
+def checkDonation(txn_hash,donor_address):
+
+    try:
+        receipt = web3.eth.getTransactionReceipt(txn_hash)
+
+        logs = donationContract.events.MadeDonation().processReceipt(receipt)
+        # To protect user privacy, we will use sha256 to hash the donor' eth address
+        # Here we will hash the donor's eth address to check whether the hashed values are same
+        if(logs [0]['args']['donor']== encrypt_string(donor_address)):
+            return True
+        else:
+            return False
+    except Exception as ex:
+        print(ex)
+        return False
+
+def checkConfirmation(txn_hash,project_solidity_id,amount):
+    try:
+        receipt = web3.eth.getTransactionReceipt(txn_hash)
+        logs = donationContract.events.MadeConfirmation().processReceipt(receipt)
+        if(logs [0]['args']['projectId']== project_solidity_id and logs [0]['args']['amount']== int(amount)):
+            return True
+        else:
+            return False
+    except Exception as ex:
+        print(ex)
+        return False
+
+
+
+def encrypt_string(hash_string):
+    sha_signature = \
+        hashlib.sha256(hash_string.encode()).hexdigest()
+    return sha_signature
