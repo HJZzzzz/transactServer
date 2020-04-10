@@ -51,7 +51,7 @@ contract Registration {
   uint256 public numInspectors = 0;
   uint256 numOrganizations = 0;
 
-event DonorApproval(address donor, address inspector);
+event DonorApproval(string donor, address inspector);
 event OrganizationApproval(address organization, address inspector);
 
   modifier onlyOwner() {
@@ -97,9 +97,9 @@ event OrganizationApproval(address organization, address inspector);
     });
   }
 
-  function approveDonor(address _donorAddress) public onlyOwner{
+  function approveDonor(address _donorAddress, string memory hashAddress) public onlyOwner{
     donors[_donorAddress].set = true;
-    emit DonorApproval(_donorAddress,msg.sender);
+    emit DonorApproval(hashAddress,msg.sender);
   }
 
   //reject and suspend donor

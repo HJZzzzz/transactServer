@@ -18,7 +18,7 @@ contract Donation {
     mapping(uint256 => donation) public donations;
     mapping(uint256 => confirmation) public confirmations;
 
-    event MadeDonation(address donor, address charityOrg, uint amount);
+    event MadeDonation(string donor, address charityOrg, uint amount);
     //event DonationConfirmed(uint donationId);
     event MadeConfirmation(uint amount, int projectId);
 
@@ -42,7 +42,7 @@ contract Donation {
     uint256 numConfirmations = 0;
 
     //to transfer to projectIdOwner
-    function makeDonation(uint _amount, int _projectId) public returns (uint256) {
+    function makeDonation(uint _amount, int _projectId,string memory hashDonor) public returns (uint256) {
         require(registrationContract.approvedDonor(msg.sender), 'Only approved donor can make donation');
         require(registrationContract.approvedOrganization(registrationContract.getOrganizationAddByProjectId(_projectId)), 'Only approved organization can accept donation');
         require(uint(registrationContract.checkProjectStatus(_projectId)) == 1, 'Only approved project can accept donation');
@@ -59,8 +59,8 @@ contract Donation {
             false
         );
         donations[_donationId] = newDonation;
-        emit MadeDonation(msg.sender, msg.sender, _amount);
-        registrationContract.distributeDonation(_amount, _projectId);
+        emit MadeDonation(hashDonor, _charity, _amount);
+        // registrationContract.distributeDonation(_amount, _projectId);
         return _donationId;
     }
     
