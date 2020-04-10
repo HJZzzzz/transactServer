@@ -41,6 +41,7 @@ def donate():
         donor = request.form.get("donor_id")
         result = db.donors.find_one({"_id": ObjectId(donor)})
         result1 = db.projects.find_one({"_id": ObjectId(pid)})
+        anonymous = request.form.get("anonymous")
         # To protect user privacy, we will use sha256 to hash the donor' eth address
         txn = blockchainSetup.make_donation(int(amount), int(result1['project_solidity_id']), result['eth_address'])
         print(txn)
@@ -51,7 +52,7 @@ def donate():
             "donor_address": request.form.get("donor_address"),
             "donation_time": str(datetime.datetime.now().strftime("%Y-%m-%d")),
             "donation_hash": txn,
-            "confirmed_hash": ''
+            "anonymous": anonymous
         }
 
         donation_id = db.donations.insert_one(new_donation)
@@ -979,19 +980,22 @@ def retrieveDonorsByProject():
         project['_id'] = str(project['_id'])
 
         donations = list(db.donations.find({"project_id": ObjectId(project['_id'])}))
-        print(donations)
         for i in donations:
             donor = db.donors.find_one({"_id": i['donor_id']})
             # Check the donation information from blockchain to make sure this donation is valid
             check = blockchainSetup.checkDonation(i['donation_hash'],donor['eth_address'])
             if(check == True):
-                print(donor)
                 i['_id'] = str(i['_id'])
                 i['project_id'] = str(i['project_id'])
                 i['donor_id'] = str(i['donor_id'])
-                i['donor'] = donor['username']
+                if(i['anonymous'] == 'true'):
+                    i['donor'] = 'Anonymous Donor'
+                else:
+                    i['donor'] = donor['username'][0] + 'xxx' + donor['username'][-1]
             else:
                 donations.remove(i)
+
+            print(donations)
 
         latestDonors = list(reversed(list(donations)))
 
