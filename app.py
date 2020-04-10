@@ -84,7 +84,18 @@ def registerDonor():
     donor_id = ''
     try:
         address = request.form.get("eth_address")
-        #TODO: check address exists or not before add new record
+        
+        unique_username = db.donors.find_one({'username': request.form.get("username")})
+        unique_eth_add = db.donors.find_one({'eth_address': request.form.get("eth_address")})
+        if unique_username is not None:
+            return jsonify({
+                "code":400,
+                "message": 'This username has been taken, please try another one'})
+        if unique_eth_add is not None:
+            return jsonify({
+                "code":400,
+                "message": 'This ethereum address already has an account'})
+                
         txn = blockchainSetup.registerDonor(address, request.form.get("full_name"))
         new_donor = {
             "username": request.form.get("username"),
@@ -356,7 +367,17 @@ def registerOrganization():
 
     charity = request.form.get("eth_address")
     try:
-
+        unique_username = db.charities.find_one({'username': request.form.get("username")})
+        unique_eth_add = db.charities.find_one({'eth_address': request.form.get("eth_address")})
+        if unique_username is not None:
+            return jsonify({
+                "code":400,
+                "message": 'This username has been taken, please try another one'})
+        if unique_eth_add is not None:
+            return jsonify({
+                "code":400,
+                "message": 'This ethereum address already has an account'})
+        
         txn = blockchainSetup.registerOrganization(charity, request.form.get("full_name"))
         new_charity = {
             "username": request.form.get("username"),
