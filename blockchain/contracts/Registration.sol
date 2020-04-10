@@ -205,6 +205,8 @@ event OrganizationApproval(address organization, address inspector);
     return inspectorAddress[inspectorId]; 
   }
 
+  // Project related functionalities 
+  
   function registerProject(uint256 beneficiaryGainedRatio) public returns (int){
     require(approvedOrganization(msg.sender), 'Only approved organisation can create project.');
     CharityProject memory newProject = CharityProject(
@@ -217,7 +219,6 @@ event OrganizationApproval(address organization, address inspector);
     );
     int newProjectId = numProjects++; 
     projectList[newProjectId] = newProject; 
-        
     emit RegisterProject(msg.sender, newProjectId);
     return newProjectId; 
   }
@@ -250,7 +251,7 @@ event OrganizationApproval(address organization, address inspector);
   }
 
   function getOrganizationAddByProjectId(int projectId) public view returns(address){
-        return projectList[projectId].projectOrganizationAdd;
+    return projectList[projectId].projectOrganizationAdd;
   }
 
   function distributeDonation(uint256 donationAmount, int projectId) public{
