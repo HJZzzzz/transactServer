@@ -8,6 +8,7 @@ from blockchainSetup import  web3
 from pymongo.errors import ConnectionFailure
 from bson.json_util import dumps
 import os
+import hashlib
 import pandas as pd
 from pathlib import Path
 import copy
@@ -98,12 +99,21 @@ def registerDonor():
                 "message": 'This ethereum address already has an account'})
                 
         txn = blockchainSetup.registerDonor(address, request.form.get("full_name"))
+
+        #hash password
+        salt = os.urandom(32)
+        password = request.form.get("password")
+        key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+        # Store them as:
+        passwordStorage = salt + key
+
         new_donor = {
             "username": request.form.get("username"),
-            "password": request.form.get("password"),
+            "password": passwordStorage,
             "email": request.form.get("email"),
             "eth_address": request.form.get("eth_address"),
-            "bank_account": request.form.get("bank_account"),
+            "card_number": request.form.get("card_number"),
+            "card_expiry_date": request.form.get("card_expiry_date"),
             "physical_address": request.form.get("physical_address"),
             "full_name": request.form.get("full_name"),
             "contact_number": request.form.get("contact_number"),
@@ -136,23 +146,30 @@ def registerDonor():
 def updateDonor():
 
     donors = db.donors
-
     donor = request.form.get("eth_address")
 
     try:
         txn = blockchainSetup.updateDonor(donor, request.form.get("full_name"))
+        updateDic = {
+            "username": request.form.get("username"),
+            "email": request.form.get("email"),
+            "card_number": request.form.get("card_number"),
+            "card_expiry_date": request.form.get("card_expiry_date"),
+            "physical_address": request.form.get("physical_address"),
+            "full_name": request.form.get("full_name"),
+            "contact_number": request.form.get("contact_number"),
+        }
+
+        if "password" in request.form:
+            password = request.form.get("password")
+            salt = os.urandom(32)
+            key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+            passwordStorage = salt + key
+            updateDic["password"] = passwordStorage
 
         result = donors.find_one_and_update(
             {"eth_address": donor},
-            {"$set":{
-                "username": request.form.get("username"),
-                "password": request.form.get("password"),
-                "email": request.form.get("email"),
-                "bank_account": request.form.get("bank_account"),
-                "physical_address": request.form.get("physical_address"),
-                "full_name": request.form.get("full_name"),
-                "contact_number": request.form.get("contact_number"),
-            }
+            {"$set": updateDic
             }
         )
         dic = {"code": 200}
@@ -224,6 +241,7 @@ def getDonorDetails():
         # txn = blockchainSetup.getDonorDetails(donor)
         db_result = db.donors.find_one({"eth_address":donor})
         db_result['_id'] = str(db_result['_id'])
+        db_result['password'] = ""
         db_result["code"] = "200"
         return jsonify(db_result)
         
@@ -264,6 +282,7 @@ def getAllPendingDonors():
         )
         for result in all_result:
             result['_id'] = str(result['_id'])
+            result['password'] = ""
             result_list.append(result)
 
         return jsonify(
@@ -313,8 +332,14 @@ def getProjectsByOrganization():
             for d in donations:
                 num += int(d['amount'])
                 numDonors += 1
-            # total amount: $$ of donations
+
+            confirmations = list(db.confirmations.find({"project_id":ObjectId(result['_id'])}))
+            total_confirm = 0
+            for c in confirmations:
+                total_confirm += int(c['amount'])
+
             result['actual_amount'] = num
+            result['confirmed_amount'] = total_confirm
             result['num_donors'] = numDonors
             result['_id'] = str(result['_id'])
             result['charity_id'] = str(result['charity_id'])
@@ -340,6 +365,10 @@ def getProjectsByDonor():
         for project_id in unique_projects:
             project = db.projects.find_one({"_id":ObjectId(project_id)})
             donations = list(db.donations.find({"project_id": ObjectId(project_id)}))
+            self_donations = list(db.donations.find({
+                "project_id": ObjectId(project_id),
+                "donor_address": donor
+            }))
             result = {}
             result['_id'] = project_id
 
@@ -347,7 +376,18 @@ def getProjectsByDonor():
             for d in donations:
                 num += int(d['amount'])
             # total amount: $$ of donations
+            confirmations = list(db.confirmations.find({"project_id":ObjectId(project_id)}))
+            total_confirm = 0
+            for c in confirmations:
+                total_confirm += int(c['amount'])
+
+            totl_contributed = 0
+            for s in self_donations:
+                totl_contributed += int(s["amount"])
+
             result['actual_amount'] = num
+            result['confirmed_amount'] = total_confirm
+            result['amount'] = totl_contributed
             result['projectName'] = project['projectName']
             result['expirationDate'] = project['expirationDate']
             result['fundTarget'] = project['fundTarget']
@@ -380,33 +420,47 @@ def registerOrganization():
                 "message": 'This ethereum address already has an account'})
         
         txn = blockchainSetup.registerOrganization(charity, request.form.get("full_name"))
+
+        #hash password
+        salt = os.urandom(32)
+        password = request.form.get("password")
+        key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+        # Store them as:
+        passwordStorage = salt + key
+
         new_charity = {
             "username": request.form.get("username"),
-            "password": request.form.get("password"),
+            "password": passwordStorage,
             "email": request.form.get("email"),
             "eth_address": request.form.get("eth_address"),
-            "bank_account": request.form.get("bank_account"),
+            "card_number": request.form.get("card_number"),
+            "card_expiry_date": request.form.get("card_expiry_date"),
             "physical_address": request.form.get("physical_address"),
             "full_name": request.form.get("full_name"),
             "contact_number": request.form.get("contact_number"),
-            "financial_info": request.form.get("financial_info"),
             "description": request.form.get("description"),
             "registration_hash": txn,
             "approval_hash":''
         }
-        charity_id = db.charities.insert_one(new_charity)
+        charity_id = str(db.charities.insert_one(new_charity).inserted_id)
+        
+        #store certificate
+        certificate = request.files["certificate"]
+        folder_path = "./certificate/" + request.form.get("eth_address") + "/"
+        Path(folder_path).mkdir(parents=True, exist_ok=True)
+        filename = "certificate.pdf"
+        certificate.save(os.path.join(folder_path, filename))
+
     except Exception as ex:
         print(ex)
         print(type(ex))
         return jsonify(
             {"code": 400,
-            "error": str(ex)}
+            "message": str(ex)}
             # {"error": str(ex.args[0]['message'])}
         )
 
-    # dic = {"charity_id": str(charity_id.inserted_id)}
-    # return jsonify(dic)
-    return jsonify({"code":200})
+    return jsonify({"code":200, "charity_id": charity_id})
 
 
 @app.route("/approveOrganization", methods=['POST'])
@@ -472,27 +526,42 @@ def rejectOrganization():
 def updateOrganization():
 
     charities = db.charities
-
     charity = request.form.get("eth_address")
 
     try:
         txn = blockchainSetup.updateOrganization(charity, request.form.get("full_name"))
+        updateDic = {
+            "username": request.form.get("username"),
+            "email": request.form.get("email"),
+            "card_number": request.form.get("card_number"),
+            "card_expiry_date": request.form.get("card_expiry_date"),
+            "physical_address": request.form.get("physical_address"),
+            "full_name": request.form.get("full_name"),
+            "contact_number": request.form.get("contact_number"),
+            "description": request.form.get("description"),
+        }
+
+        if "password" in request.form:
+            password = request.form.get("password")
+            salt = os.urandom(32)
+            key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+            passwordStorage = salt + key
+            updateDic["password"] = passwordStorage
 
         result = charities.find_one_and_update(
             {"eth_address": charity},
-            {"$set":{
-                "username": request.form.get("username"),
-                "password": request.form.get("password"),
-                "email": request.form.get("email"),
-                "bank_account": request.form.get("bank_account"),
-                "physical_address": request.form.get("physical_address"),
-                "full_name": request.form.get("full_name"),
-                "contact_number": request.form.get("contact_number"),
-                "financial_info": request.form.get("financial_info"),
-                "description": request.form.get("description"),
-            }
+            {"$set": updateDic
             }
         )
+
+        #update certificate
+        if "certificate" in request.files:
+            certificate = request.files["certificate"]
+            folder_path = "./certificate/" + charity + "/"
+            Path(folder_path).mkdir(parents=True, exist_ok=True)
+            filename = "certificate.pdf"
+            certificate.save(os.path.join(folder_path, filename))
+
         dic = {"code": 200}
         return jsonify(dic)
     except Exception as ex:
@@ -527,6 +596,7 @@ def getAllPendingOrganizations():
         )
         for result in all_result:
             result['_id'] = str(result['_id'])
+            result['password'] = ""
             result_list.append(result)
 
         return jsonify(
@@ -563,9 +633,9 @@ def getCharityDetails():
     print(charity)
 
     try: 
-        # txn = blockchainSetup.getDonorDetails(donor)
         db_result = db.charities.find_one({"eth_address":charity})
         db_result['_id'] = str(db_result['_id'])
+        db_result["password"] = ""
         db_result["code"] = 200,
         return jsonify(db_result)
         
@@ -574,9 +644,6 @@ def getCharityDetails():
                 "code":400,
                 "message": str(ex)
             })    
-
-
-
 
 @app.route("/confirmMoney", methods=['POST'])
 def confirmMoney():
@@ -893,6 +960,12 @@ def getBeneficiaryFormatFile():
     file_path = "./beneficiary/beneficiary.xlsx"
     return send_file(file_path, attachment_filename='beneficiary.xlsx')
 
+@app.route("/certificateFile", methods=['get'])
+def getCertificateFile():
+    charityAddress = request.args.get("address")
+    file_path = "./certificate/" + charityAddress + "/certificate.pdf"
+    return send_file(file_path, attachment_filename='certificate.pdf')
+
 @app.route("/approveProject", methods=['POST'])
 def approveProject():
     projects = db.projects 
@@ -991,7 +1064,7 @@ def retrieveDonorsByProject():
                 if(i['anonymous'] == 'true'):
                     i['donor'] = 'Anonymous Donor'
                 else:
-                    i['donor'] = donor['username'][0] + 'xxx' + donor['username'][-1]
+                    i['donor'] = donor['full_name'][0] + 'xxx' + donor['full_name'][-1]
             else:
                 donations.remove(i)
 
@@ -1009,7 +1082,19 @@ def loginDonor():
     try:
         results = donors.find_one({"username": request.args.get("username")})
 
-        if ( len(results) and results["password"] == request.args.get("password")):
+        salt = results["password"][:32] # Get the salt you stored for *this* user
+        key = results["password"][32:] # Get this users key calculated
+
+        password_to_check = request.args.get("password") # The password provided by the user to check
+
+        new_key = hashlib.pbkdf2_hmac(
+            'sha256',
+            password_to_check.encode('utf-8'), # Convert the password to bytes
+            salt, 
+            100000
+        )
+
+        if ( len(results) and new_key == key):
             approval = blockchainSetup.checkDonorApproval(results["approval_hash"],results["eth_address"])
             if(approval):
                 return jsonify(
@@ -1037,9 +1122,21 @@ def loginDonor():
 def loginCharity():
     charities = db.charities
     try:
-        print("username", request.args.get("username"))
         results = charities.find_one({"username": request.args.get("username")})
-        if ( len(results) and results["password"] == request.args.get("password")):
+
+        salt = results["password"][:32] # Get the salt you stored for *this* user
+        key = results["password"][32:] # Get this users key calculated
+
+        password_to_check = request.args.get("password") # The password provided by the user to check
+
+        new_key = hashlib.pbkdf2_hmac(
+            'sha256',
+            password_to_check.encode('utf-8'), # Convert the password to bytes
+            salt, 
+            100000
+        )
+
+        if ( len(results) and key == new_key):
             approval = blockchainSetup.checkCharityApproval(results["approval_hash"],results["eth_address"])
             if approval:
                 return jsonify(
