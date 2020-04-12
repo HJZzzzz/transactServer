@@ -53,6 +53,8 @@ contract Registration {
 
 event DonorApproval(string donor, address inspector);
 event OrganizationApproval(address organization, address inspector);
+event DonorReject(string donor, address inspector);
+event OrganizationReject(address organization, address inspector);
 
   modifier onlyOwner() {
       require(msg.sender == owner);
@@ -103,8 +105,9 @@ event OrganizationApproval(address organization, address inspector);
   }
 
   //reject and suspend donor
-  function rejectDonor(address _donorAddress) public onlyOwner{
+  function rejectDonor(address _donorAddress,string memory hashAddress) public onlyOwner{
     donors[_donorAddress].set = false;
+    emit DonorReject(hashAddress,msg.sender);
   }
 
   function updateDonor(address _donorAddress, string memory _donorName) public{
@@ -160,6 +163,7 @@ event OrganizationApproval(address organization, address inspector);
 
   function rejectOrganization(address _organizationAddress) public onlyOwner{
     organizations[_organizationAddress].set = false;
+    emit OrganizationReject(_organizationAddress, msg.sender);
   }
 
   function updateOrganization(address _organizationAddress, string memory _organizationName) public{
