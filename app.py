@@ -121,7 +121,7 @@ def send_email_charity_approval(recipient, charityName):
         <p>http://localhost:3001/ </p>
         </body>
     </html> """
-    subject = "TransACT - Thank you for your donation!"
+    subject = "TransACT - Your registration has been approved!"
     message = Mail(
         from_email='no-reply@transact.sg',
         to_emails=[recipient],
