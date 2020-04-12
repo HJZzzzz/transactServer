@@ -331,12 +331,18 @@ def getProjectsByOrganization():
             numDonors = 0
 
             stop = blockchainSetup.checkProjectStop(result['approval_hash'], result['project_solidity_id'])
+            aproval = blockchainSetup.checkProjectApproval(result['approval_hash'], result['project_solidity_id'])
+            reject =  blockchainSetup.checkProjectReject(result['approval_hash'], result['project_solidity_id'])
             if(stop):
-                result['stop'] = "1"
-            elif(result['approval_hash']==''):
-                result['stop'] = '-1'
-            else:
+                result['stop'] = "1"        #project stopped
+            elif(reject):
+                result['stop'] = "10"   #rejected
+            elif(aproval):           # approved
                 result['stop'] = "0"
+            else:     #wait approval
+                result['stop'] = '-1'
+
+
             for d in donations:
                 num += int(d['amount'])
                 numDonors += 1
@@ -695,6 +701,7 @@ def retrieveConfirmation():
         project_id = request.args.get("project_id")
         result = list(db.confirmations.find({"project_id":ObjectId(project_id)}))
         # print(result)
+        result_list = []
         num = 0
         for i in result:
             project = db.projects.find_one({"_id": i['project_id']})
@@ -704,10 +711,9 @@ def retrieveConfirmation():
                 i['_id'] = str(i['_id'])
                 i['project_id'] = str(i['project_id'])
                 num += int(i['amount'])
-            else:
-                result.remove(i)
+                result_list.append(i)
 
-        result1={'confirmations':result,'total_confirmation':num}
+        result1={'confirmations':result_list,'total_confirmation':num}
         return jsonify({"code": 200, "result": result1})
     except Exception as ex:
         return jsonify({"code": 400, "message": str(ex)})
@@ -1024,7 +1030,6 @@ def rejectProject():
 
     try:
         txn = blockchainSetup.rejectProject(inspector, int(project_solidity_id))
-        txn = blockchainSetup.stopProject(inspector, int(project_solidity_id))
         result = projects.find_one_and_update(
             {"project_solidity_id": int(project_solidity_id)},
             {"$set":{
@@ -1045,6 +1050,7 @@ def retrieveAllProjects():
     projects = db.projects
     try:
         result = list(projects.find({"approval_hash": { "$ne": ""}}))
+        result_list = []
         for i in result:
             # Check the approval information from blockchain to make sure this project is valid
             check = blockchainSetup.checkProjectApproval(i['approval_hash'], i['project_solidity_id'])
@@ -1065,9 +1071,9 @@ def retrieveAllProjects():
                     if (check == True):
                         num += int(d['amount'])
                 i['actual_amount'] = num
-            else:
-                result.remove(i)
-        return jsonify({"code":200, "result": result})
+                result_list.append(i)
+
+        return jsonify({"code":200, "result": result_list})
     except Exception as ex:
         return jsonify({"code":400, "message":str(ex)})
 
@@ -1078,6 +1084,7 @@ def retrieveDonorsByProject():
         project['_id'] = str(project['_id'])
 
         donations = list(db.donations.find({"project_id": ObjectId(project['_id'])}))
+        result_list = []
         for i in donations:
             donor = db.donors.find_one({"_id": i['donor_id']})
             # Check the donation information from blockchain to make sure this donation is valid
@@ -1090,12 +1097,12 @@ def retrieveDonorsByProject():
                     i['donor'] = 'Anonymous Donor'
                 else:
                     i['donor'] = donor['full_name'][0] + 'xxx' + donor['full_name'][-1]
-            else:
-                donations.remove(i)
+                result_list.append(i)
+
 
             # print(donations)
 
-        latestDonors = list(reversed(list(donations)))
+        latestDonors = list(reversed(list(result_list)))
 
         return jsonify({"code":200, "latestDonors": latestDonors})
     except Exception as ex:
@@ -1121,6 +1128,7 @@ def loginDonor():
 
         if ( len(results) and new_key == key):
             approval = blockchainSetup.checkDonorApproval(results["approval_hash"],results["eth_address"])
+            reject = blockchainSetup.checkDonorReject(results["approval_hash"],results["eth_address"])
             if(approval):
                 return jsonify(
                     {   
@@ -1130,6 +1138,8 @@ def loginDonor():
                         "eth_address": results["eth_address"]
                      }
                 )
+            elif(reject):
+                return jsonify({"code":400, "message": "Sorry, Your account is rejected!"})
             else:
                 return jsonify({"code":400, "message": "Your account is still waiting for approval!"})
 
@@ -1163,6 +1173,7 @@ def loginCharity():
 
         if ( len(results) and key == new_key):
             approval = blockchainSetup.checkCharityApproval(results["approval_hash"],results["eth_address"])
+            reject = blockchainSetup.checkCharityReject(results["approval_hash"],results["eth_address"])
             if approval:
                 return jsonify(
                     {
@@ -1172,6 +1183,8 @@ def loginCharity():
                         "eth_address": results["eth_address"]
                     }
                 )
+            elif(reject):
+                return jsonify({"code":400, "message": "Sorry, Your account is rejected!"})
             else:
                 return jsonify({"code":400, "message": "Your account is still waiting for approval!"})
         else:
