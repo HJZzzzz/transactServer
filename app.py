@@ -334,7 +334,7 @@ def getProjectsByOrganization():
             if(stop):
                 result['stop'] = "1"
             elif(result['approval_hash']==''):
-                result['stop'] = '-1'
+                result['stop'] = "-1"
             else:
                 result['stop'] = "0"
             for d in donations:
@@ -386,7 +386,7 @@ def getProjectsByDonor():
             if(stop):
                result['stop'] = "1"
             elif(result['approval_hash']==''):
-               result['stop'] = '-1'
+               result['stop'] = "-1"
             else:
                result['stop'] = "0"
 
