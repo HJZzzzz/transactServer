@@ -381,14 +381,13 @@ def getProjectsByDonor():
             result = {}
             result['_id'] = project_id
 
-
             stop = blockchainSetup.checkProjectStop(project['approval_hash'], project['project_solidity_id'])
             if(stop):
-               result['stop'] = "1"
-            elif(result['approval_hash']==''):
-               result['stop'] = "-1"
+                result['stop'] = "1"
+            elif(project['approval_hash'] ==''):
+                result['stop'] = "-1"
             else:
-               result['stop'] = "0"
+                result['stop'] = "0"
 
             num = 0
             for d in donations:
@@ -1045,9 +1044,11 @@ def retrieveAllProjects():
     projects = db.projects
     try:
         result = list(projects.find({"approval_hash": { "$ne": ""}}))
+        return_list = []
         for i in result:
             # Check the approval information from blockchain to make sure this project is valid
             check = blockchainSetup.checkProjectApproval(i['approval_hash'], i['project_solidity_id'])
+
             if(check):
                 i['_id'] = str(i['_id'])
                 i['charity_id'] = str(i['charity_id'])
@@ -1065,9 +1066,10 @@ def retrieveAllProjects():
                     if (check == True):
                         num += int(d['amount'])
                 i['actual_amount'] = num
-            else:
-                result.remove(i)
-        return jsonify({"code":200, "result": result})
+                return_list.append(i)
+
+        return_list = return_list[::-1]
+        return jsonify({"code":200, "result": return_list})
     except Exception as ex:
         return jsonify({"code":400, "message":str(ex)})
 
@@ -1089,11 +1091,9 @@ def retrieveDonorsByProject():
                 if(i['anonymous'] == 'true'):
                     i['donor'] = 'Anonymous Donor'
                 else:
-                    i['donor'] = donor['full_name'][0] + 'xxx' + donor['full_name'][-1]
+                    i['donor'] = donor['full_name'][0] + '***' + donor['full_name'][-1]
             else:
                 donations.remove(i)
-
-            # print(donations)
 
         latestDonors = list(reversed(list(donations)))
 
