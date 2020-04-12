@@ -17,14 +17,14 @@ with open("./blockchain/build/contracts/Project.json") as project:
     info_json = json.load(project)
 abi = info_json["abi"]
 
-projectContractAddress = '0x03d516a658b079A7cD984e6109A6399A3F87a847'
+projectContractAddress = '0x2F860C55A6F8E97dc0cA7Fb0410DC46d00a117bF'
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
 with open("./blockchain/build/contracts/Registration.json") as regist:
     info_json = json.load(regist)
 abi = info_json["abi"]
 
-registrationContractAddress = '0xC812866De0365AF9E8c7aaf3415b4bdD2EcE31E5'
+registrationContractAddress = '0xf49c91c04f1d784c958Ac519AE8F4a5DF12eB0d7'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -32,7 +32,7 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
     info_json = json.load(donation)
 abi = info_json["abi"]
 
-donationContractAddress = '0x6C09d30318AFaA4Dc6761f808c2E48B05fA21aCe'
+donationContractAddress = '0x840a41E6A093Ad3167EBceF7d4706d64ef5E0Efa'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
 def make_donation(amount, pid, donor):
@@ -84,8 +84,9 @@ def approveDonor(donor,inspector):
     print(receipt)
     return receipt.transactionHash.hex()
 
-def rejectDonor(donor, inspector): 
-    txn = registrationContract.functions.rejectDonor(donor).transact({'from': inspector})
+def rejectDonor(donor, inspector):
+    hash = encrypt_string(donor)
+    txn = registrationContract.functions.rejectDonor(donor,hash).transact({'from': inspector})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     print(receipt)
     return receipt.transactionHash.hex()
@@ -189,12 +190,36 @@ def checkDonorApproval(txn_hash,donor):
     except Exception as ex:
         print(ex)
         return False
-        
+
+def checkDonorReject(txn_hash,donor):
+    try:
+        receipt = web3.eth.getTransactionReceipt(txn_hash)
+        logs = registrationContract.events.DonorReject().processReceipt(receipt)
+        # print(logs)
+        if(logs[0]['args']['donor']==encrypt_string(donor)):
+            # print(logs[0]['args']['donor'])
+            return True
+        return False
+    except Exception as ex:
+        print(ex)
+        return False
+
 def checkCharityApproval(txn_hash, charity):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
         logs = registrationContract.events.OrganizationApproval().processReceipt(receipt)
 
+        if(logs[0]['args']['organization']==charity):
+            return True
+        return False
+    except Exception as ex:
+        print(ex)
+        return False
+
+def checkCharityReject(txn_hash, charity):
+    try:
+        receipt = web3.eth.getTransactionReceipt(txn_hash)
+        logs = registrationContract.events.OrganizationReject().processReceipt(receipt)
         if(logs[0]['args']['organization']==charity):
             return True
         return False
@@ -221,6 +246,20 @@ def checkProjectStop(txn_hash,project_solidity_id):
         receipt = web3.eth.getTransactionReceipt(txn_hash)
 
         logs = registrationContract.events.StopProject().processReceipt(receipt)
+        print(logs)
+        if(logs [0]['args']['projectId']== project_solidity_id):
+            return True
+        else:
+            return False
+    except Exception as ex:
+        print(ex)
+        return False
+
+def checkProjectReject(txn_hash,project_solidity_id):
+    try:
+        receipt = web3.eth.getTransactionReceipt(txn_hash)
+
+        logs = registrationContract.events.RejectProject().processReceipt(receipt)
         print(logs)
         if(logs [0]['args']['projectId']== project_solidity_id):
             return True
