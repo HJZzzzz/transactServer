@@ -329,6 +329,14 @@ def getProjectsByOrganization():
             donations = list(db.donations.find({"project_id": ObjectId(result['_id'])}))
             num = 0
             numDonors = 0
+
+            stop = blockchainSetup.checkProjectStop(result['approval_hash'], result['project_solidity_id'])
+            if(stop):
+                result['stop'] = "1"
+            elif(result['approval_hash']==''):
+                result['stop'] = '-1'
+            else:
+                result['stop'] = "0"
             for d in donations:
                 num += int(d['amount'])
                 numDonors += 1
@@ -364,6 +372,7 @@ def getProjectsByDonor():
         result_list = []
         for project_id in unique_projects:
             project = db.projects.find_one({"_id":ObjectId(project_id)})
+
             donations = list(db.donations.find({"project_id": ObjectId(project_id)}))
             self_donations = list(db.donations.find({
                 "project_id": ObjectId(project_id),
@@ -371,6 +380,15 @@ def getProjectsByDonor():
             }))
             result = {}
             result['_id'] = project_id
+
+
+            stop = blockchainSetup.checkProjectStop(project['approval_hash'], project['project_solidity_id'])
+            if(stop):
+               result['stop'] = "1"
+            elif(result['approval_hash']==''):
+               result['stop'] = '-1'
+            else:
+               result['stop'] = "0"
 
             num = 0
             for d in donations:
@@ -676,7 +694,7 @@ def retrieveConfirmation():
     try:
         project_id = request.args.get("project_id")
         result = list(db.confirmations.find({"project_id":ObjectId(project_id)}))
-        print(result)
+        # print(result)
         num = 0
         for i in result:
             project = db.projects.find_one({"_id": i['project_id']})
@@ -707,9 +725,20 @@ def retrieveProjectDetails():
     try:
         result = db.projects.find_one({"_id":ObjectId(request.args.get("id"))})
 
+        approval = blockchainSetup.checkProjectApproval(result['approval_hash'], result['project_solidity_id'])
+        stop = blockchainSetup.checkProjectStop(result['approval_hash'], result['project_solidity_id'])
+
+        if(not approval and not stop):
+            return jsonify({"code": 400, "error": "This Project is still waiting for approval!"})
+        if(stop):
+            result['stop'] = "1"
+        else:
+            result['stop'] = "0"
+
+
         result['_id'] = str(result['_id'])
         image_path = './projectCover/'+ result['_id'] + '/cover.jpg'
-        print(image_path)
+
         image = get_byte_image(image_path)
         result["image"] = image
 
@@ -717,11 +746,6 @@ def retrieveProjectDetails():
         charity = db.charities.find_one({"_id":ObjectId(result['charity_id'])})
         result['charity_name'] = charity['full_name']
 
-        # approval = blockchainSetup.checkProjectApproval(result['approval_hash'])
-        # if(approval):
-        #     return jsonify(result)
-        # else:
-        #     return jsonify({"code": 400, "error": "This Project is still waiting for approval!"})
         result['charity_description'] = charity['description']
         result['charity_number'] = charity['contact_number']
         result['charity_email'] = charity['email']
@@ -908,13 +932,14 @@ def getAllApprovedProjects():
                     donor = db.donors.find_one({"_id": d['donor_id']})
                     check = blockchainSetup.checkDonation(d['donation_hash'], donor['eth_address'])
                     if (check == True):
-                        num += d['amount']
+                        num += int(d['amount'])
                         numDonors = numDonors + 1
                 if num < int(result['fundTarget']):
                     result['actual_amount'] = num
                     result['numDonors'] = numDonors
                     result['charity_id'] = str(result['charity_id'])
                     result_list.append(result)
+            print(result)
         return jsonify(
             {"code": 200,
             "items": result_list}
@@ -1068,7 +1093,7 @@ def retrieveDonorsByProject():
             else:
                 donations.remove(i)
 
-            print(donations)
+            # print(donations)
 
         latestDonors = list(reversed(list(donations)))
 

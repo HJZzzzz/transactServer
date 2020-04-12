@@ -17,14 +17,14 @@ with open("./blockchain/build/contracts/Project.json") as project:
     info_json = json.load(project)
 abi = info_json["abi"]
 
-projectContractAddress = '0xdB2b6c6E69Dd8699C6d6f0A682695A0860e87B28'
+projectContractAddress = '0x03d516a658b079A7cD984e6109A6399A3F87a847'
 projectContract = web3.eth.contract(abi=abi, address=projectContractAddress)
 
 with open("./blockchain/build/contracts/Registration.json") as regist:
     info_json = json.load(regist)
 abi = info_json["abi"]
 
-registrationContractAddress = '0x1a547BF47C800d7eaBFFDf4A11C2eBfB707ce353'
+registrationContractAddress = '0xC812866De0365AF9E8c7aaf3415b4bdD2EcE31E5'
 registrationContract = web3.eth.contract(abi=abi, address=registrationContractAddress)
 
 
@@ -32,7 +32,7 @@ with open("./blockchain/build/contracts/Donation.json") as donation:
     info_json = json.load(donation)
 abi = info_json["abi"]
 
-donationContractAddress = '0x6AdF935f29169766E869fa2E7FE61c0083A9bA5D'
+donationContractAddress = '0x6C09d30318AFaA4Dc6761f808c2E48B05fA21aCe'
 donationContract = web3.eth.contract(abi=abi, address=donationContractAddress)
 
 def make_donation(amount, pid, donor):
@@ -202,7 +202,7 @@ def checkCharityApproval(txn_hash, charity):
         print(ex)
         return False
 
-def checkProjectApproval(txn_hash,project_solidity_id):
+def checkProjectApproval(txn_hash, project_solidity_id):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
 
@@ -215,6 +215,21 @@ def checkProjectApproval(txn_hash,project_solidity_id):
     except Exception as ex:
         print(ex)
         return False
+
+def checkProjectStop(txn_hash,project_solidity_id):
+    try:
+        receipt = web3.eth.getTransactionReceipt(txn_hash)
+
+        logs = registrationContract.events.StopProject().processReceipt(receipt)
+        print(logs)
+        if(logs [0]['args']['projectId']== project_solidity_id):
+            return True
+        else:
+            return False
+    except Exception as ex:
+        print(ex)
+        return False
+
 
 def checkDonation(txn_hash,donor_address):
 
