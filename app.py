@@ -53,7 +53,7 @@ def send_email_donation(recipient, projectName, amount):
         subject=subject,
         html_content=html)
 
-    client = SendGridAPIClient("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")
+    client = SendGridAPIClient("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")
     response = client.send(message)
     print(response)
 
@@ -96,7 +96,7 @@ def send_email_confirmation(recipients, projectName, amount, description):
     message.subject = subject
     message.add_content(Content('text/html', html))
 
-    client = SendGridAPIClient("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")
+    client = SendGridAPIClient("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")
     response = client.send(message)
     print(response)
 
@@ -128,7 +128,7 @@ def send_email_charity_approval(recipient, charityName):
         subject=subject,
         html_content=html)
 
-    client = SendGridAPIClient("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")
+    client = SendGridAPIClient("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")
     response = client.send(message)
     print(response)
 
@@ -929,7 +929,7 @@ def retrieveProjectDetails():
 @app.route("/registerProject", methods=['POST'])
 def registerProject():
     projectId = request.form.get("projectId")
-
+    print(projectId)
     try:
         if projectId == "0":
             beneficiaryListFile = request.files["beneficiaryList"]
@@ -989,8 +989,9 @@ def registerProject():
                     })
         else:
             beneficiaryList = []
-            beneficiaryListFile = request.files["beneficiaryList"]
             if "beneficiaryList" in request.files:
+                
+                beneficiaryListFile = request.files["beneficiaryList"]
                 df = pd.read_excel(beneficiaryListFile)
                 if list(df.columns) != ["beneficiary", "remark"]:
                     return jsonify({"code": 400, "message": "Invalid beneficiary file format."})
@@ -1015,7 +1016,6 @@ def registerProject():
                         "expirationDate": request.form.get('expirationDate'),
                         "fundTarget": request.form.get('fundTarget'),
                         "description": request.form.get("description"),
-                        "approval_hash": '',
             }
             if len(beneficiaryList) > 0:
                 update_dic["beneficiaryList"] = beneficiaryList
@@ -1236,7 +1236,7 @@ def retrieveAllProjects():
                 i['actual_amount'] = num
                 result_list.append(i)
 
-        return jsonify({"code":200, "result": result_list})
+        return jsonify({"code":200, "result": result_list[::-1]})
     except Exception as ex:
         return jsonify({"code": 400, "message": str(ex)})
 
