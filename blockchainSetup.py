@@ -43,6 +43,7 @@ def make_donation(amount, pid, donor):
     print(receipt)
     return receipt.transactionHash.hex()
 
+
 def confirmMoney(amount, pid, charity):
     txn = donationContract.functions.confirmMoney(amount, pid).transact({'from': charity})
     receipt = web3.eth.waitForTransactionReceipt(txn)
@@ -84,13 +85,15 @@ def approveDonor(donor,inspector):
     print(receipt)
     return receipt.transactionHash.hex()
 
+
 def rejectDonor(donor, inspector):
     hash = encrypt_string(donor)
     txn = registrationContract.functions.rejectDonor(donor,hash).transact({'from': inspector})
     receipt = web3.eth.waitForTransactionReceipt(txn)
     print(receipt)
     return receipt.transactionHash.hex()
-    
+
+
 def updateDonor(donor, name):
     txn = registrationContract.functions.updateDonor(donor, name).transact({'from': donor})
     receipt = web3.eth.waitForTransactionReceipt(txn)
@@ -171,6 +174,7 @@ def rejectProject(inspector, projectId):
     receipt = web3.eth.waitForTransactionReceipt(txn)
     return receipt.transactionHash.hex()
 
+
 def stopProject(inspector, projectId):
     int_id = int(projectId)
     txn = registrationContract.functions.stopProject(int_id).transact({'from': inspector})
@@ -191,6 +195,7 @@ def checkDonorApproval(txn_hash,donor):
         print(ex)
         return False
 
+
 def checkDonorReject(txn_hash,donor):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
@@ -204,6 +209,7 @@ def checkDonorReject(txn_hash,donor):
         print(ex)
         return False
 
+
 def checkCharityApproval(txn_hash, charity):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
@@ -216,6 +222,7 @@ def checkCharityApproval(txn_hash, charity):
         print(ex)
         return False
 
+
 def checkCharityReject(txn_hash, charity):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
@@ -226,6 +233,7 @@ def checkCharityReject(txn_hash, charity):
     except Exception as ex:
         print(ex)
         return False
+
 
 def checkProjectApproval(txn_hash, project_solidity_id):
     try:
@@ -241,6 +249,7 @@ def checkProjectApproval(txn_hash, project_solidity_id):
         print(ex)
         return False
 
+
 def checkProjectStop(txn_hash,project_solidity_id):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
@@ -254,6 +263,7 @@ def checkProjectStop(txn_hash,project_solidity_id):
     except Exception as ex:
         print(ex)
         return False
+
 
 def checkProjectReject(txn_hash,project_solidity_id):
     try:
@@ -286,6 +296,7 @@ def checkDonation(txn_hash,donor_address):
         print(ex)
         return False
 
+
 def checkConfirmation(txn_hash,project_solidity_id,amount):
     try:
         receipt = web3.eth.getTransactionReceipt(txn_hash)
@@ -297,7 +308,6 @@ def checkConfirmation(txn_hash,project_solidity_id,amount):
     except Exception as ex:
         print(ex)
         return False
-
 
 
 def encrypt_string(hash_string):

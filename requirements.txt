@@ -4,3 +4,8 @@ pymongo
 dnspython
 bson
 web3
+pandas
+Pillow
+xlrd
+openpyxl
+sendgrid
